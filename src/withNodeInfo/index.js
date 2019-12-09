@@ -85,16 +85,16 @@ const withNodeInfo = (PassedComponent) => {
 
       const totalYTravel = frame.height + nodeHeight;
       const yDistanceToBoundary = nodeTop + nodeHeight;
-      const yPercentageInFrame = Number((1 - (yDistanceToBoundary / totalYTravel)).toFixed(3));
+      const yPercentageInFrame = Number(((yDistanceToBoundary / totalYTravel) * 100).toFixed(3));
       const yIsInFrame = nodeTop <= frame.bottom && nodeBottom >= frame.top;
 
       const totalXTravel = frame.width + nodeWidth;
       const xDistanceToBoundary = nodeLeft + nodeWidth;
-      const xPercentageInFrame = Number((1 - (xDistanceToBoundary / totalXTravel)).toFixed(3));
+      const xPercentageInFrame = Number(((xDistanceToBoundary / totalXTravel) * 100).toFixed(3));
       const xIsInFrame = nodeRight >= frame.left && nodeLeft <= frame.right;
 
       const totalPercentageInFrame = Number(((xPercentageInFrame + yPercentageInFrame) / 2).toFixed(3));
-      const nodeIsInFrame = totalPercentageInFrame >= 0 && totalPercentageInFrame <= 1;
+      const nodeIsInFrame = xIsInFrame && yIsInFrame;
 
       return {
         xIsInFrame,
