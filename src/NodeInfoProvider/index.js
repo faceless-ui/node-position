@@ -2,37 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { WindowInfoProvider } from '@trbl/react-window-info';
 import { ScrollInfoProvider } from '@trbl/react-scroll-info';
-import NodeInfoContext from './context';
-import defaultClassPrefix from '../defaultClassPrefix';
 
 const NodeInfoProvider = (props) => {
-  const {
-    children,
-    classPrefix,
-  } = props;
+  const { children } = props;
 
   return (
     <WindowInfoProvider>
       <ScrollInfoProvider>
-        <NodeInfoContext.Provider
-          value={{
-            classPrefix: classPrefix || defaultClassPrefix,
-          }}
-        >
-          {children}
-        </NodeInfoContext.Provider>
+        {children}
       </ScrollInfoProvider>
     </WindowInfoProvider>
   );
 };
 
-NodeInfoProvider.defaultProps = {
-  classPrefix: '',
-};
+NodeInfoProvider.defaultProps = {};
 
 NodeInfoProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  classPrefix: PropTypes.string,
 };
 
 export default NodeInfoProvider;

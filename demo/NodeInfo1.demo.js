@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import withNodeInfo from '../src/withNodeInfo';
 
-const NodeInfoDemo1 = (props) => {
+const NodeInfoDemo1 = forwardRef((props, ref) => {
   const {
     nodeInfo: {
       nodeRect: {
@@ -24,6 +24,7 @@ const NodeInfoDemo1 = (props) => {
 
   return (
     <code
+      ref={ref}
       style={{
         backgroundColor: 'rgba(0, 0, 0, .15)',
         display: 'inline-block',
@@ -78,7 +79,7 @@ const NodeInfoDemo1 = (props) => {
       </pre>
     </code>
   );
-};
+});
 
 NodeInfoDemo1.defaultProps = {};
 

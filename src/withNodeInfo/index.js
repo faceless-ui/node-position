@@ -2,7 +2,6 @@ import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { withWindowInfo } from '@trbl/react-window-info';
 import { withScrollInfo } from '@trbl/react-scroll-info';
-import NodeInfoContext from '../NodeInfoProvider/context';
 
 const withNodeInfo = (PassedComponent) => {
   class Node extends Component {
@@ -173,25 +172,22 @@ const withNodeInfo = (PassedComponent) => {
       delete passedProps.threshold;
 
       return (
-        <div ref={this.nodeRef}>
-          <PassedComponent
-            nodeInfo={{
-              nodeRect,
-              xIsInFrame,
-              yIsInFrame,
-              xPercentageInFrame,
-              yPercentageInFrame,
-              totalPercentageInFrame,
-              nodeIsInFrame,
-            }}
-            {...passedProps}
-          />
-        </div>
+        <PassedComponent
+          ref={this.nodeRef}
+          nodeInfo={{
+            nodeRect,
+            xIsInFrame,
+            yIsInFrame,
+            xPercentageInFrame,
+            yPercentageInFrame,
+            totalPercentageInFrame,
+            nodeIsInFrame,
+          }}
+          {...passedProps}
+        />
       );
     }
   }
-
-  Node.contextType = NodeInfoContext;
 
   Node.defaultProps = {
     threshold: 0,

@@ -1,6 +1,6 @@
 {
   "name": "@trbl/react-node-info",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/build.bundle.js",
   "repository": "git@github.com:trouble/react-node-info.git",
   "description": "Send nodes.",

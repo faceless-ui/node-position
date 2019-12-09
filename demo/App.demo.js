@@ -5,7 +5,7 @@ import NodeInfoDemo2 from './NodeInfo2.demo';
 
 const AppDemo = () => {
   return (
-    <NodeInfoProvider classPrefix="demo">
+    <NodeInfoProvider>
       <NodeInfoDemo1 demoProp="demo" />
       <div style={{ padding: '125vh 125vw', display: 'flex' }}>
         <NodeInfoDemo2 />
