@@ -13,12 +13,16 @@ const NodeInfoDemo1 = forwardRef((props, ref) => {
         bottom,
         left,
       },
+      totalXTrack,
+      totalYTrack,
+      xDistanceToFrame,
+      yDistanceToFrame,
       xIsInFrame,
       yIsInFrame,
+      isInFrame,
       xPercentageInFrame,
       yPercentageInFrame,
       totalPercentageInFrame,
-      nodeIsInFrame,
     },
   } = props;
 
@@ -58,10 +62,25 @@ const NodeInfoDemo1 = forwardRef((props, ref) => {
         {'},'}
         <br />
         &emsp;
+        {`totalXTrack: ${totalXTrack},`}
+        <br />
+        &emsp;
+        {`totalYTrack: ${totalYTrack},`}
+        <br />
+        &emsp;
+        {`xDistanceToFrame: ${xDistanceToFrame},`}
+        <br />
+        &emsp;
+        {`yDistanceToFrame: ${yDistanceToFrame},`}
+        <br />
+        &emsp;
         {`xIsInFrame: ${xIsInFrame},`}
         <br />
         &emsp;
         {`yIsInFrame: ${yIsInFrame},`}
+        <br />
+        &emsp;
+        {`isInFrame: ${isInFrame},`}
         <br />
         &emsp;
         {`xPercentageInFrame: ${xPercentageInFrame},`}
@@ -71,9 +90,6 @@ const NodeInfoDemo1 = forwardRef((props, ref) => {
         <br />
         &emsp;
         {`totalPercentageInFrame: ${totalPercentageInFrame},`}
-        <br />
-        &emsp;
-        {`nodeIsInFrame: ${nodeIsInFrame},`}
         <br />
         {'}'}
       </pre>
@@ -93,12 +109,16 @@ NodeInfoDemo1.propTypes = {
       bottom: PropTypes.number,
       left: PropTypes.number,
     }),
+    totalXTrack: PropTypes.number,
+    totalYTrack: PropTypes.bool,
+    xDistanceToFrame: PropTypes.number,
+    yDistanceToFrame: PropTypes.number,
     xIsInFrame: PropTypes.bool,
     yIsInFrame: PropTypes.bool,
+    isInFrame: PropTypes.bool,
     xPercentageInFrame: PropTypes.number,
     yPercentageInFrame: PropTypes.number,
     totalPercentageInFrame: PropTypes.number,
-    nodeIsInFrame: PropTypes.bool,
   }).isRequired,
 };
 

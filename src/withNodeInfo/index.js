@@ -19,12 +19,16 @@ const withNodeInfo = (PassedComponent) => {
           bottom: 0,
           left: 0,
         },
+        totalXTrack: 0,
+        totalYTrack: 0,
+        xDistanceToFrame: 0,
+        yDistanceToFrame: 0,
         xIsInFrame: false,
         yIsInFrame: false,
         xPercentageInFrame: 0,
         yPercentageInFrame: 0,
         totalPercentageInFrame: 0,
-        nodeIsInFrame: false,
+        isInFrame: false,
       };
     }
 
@@ -83,26 +87,31 @@ const withNodeInfo = (PassedComponent) => {
         left: threshold,
       };
 
-      const totalYTravel = frame.height + nodeHeight;
-      const yDistanceToBoundary = nodeTop + nodeHeight;
-      const yPercentageInFrame = Number(((yDistanceToBoundary / totalYTravel) * 100).toFixed(3));
-      const yIsInFrame = nodeTop <= frame.bottom && nodeBottom >= frame.top;
+      const totalXTrack = frame.width + nodeWidth;
+      const xDistanceToFrame = nodeLeft + nodeWidth;
+      const xPercentageInFrame = (xDistanceToFrame / totalXTrack) * 100;
 
-      const totalXTravel = frame.width + nodeWidth;
-      const xDistanceToBoundary = nodeLeft + nodeWidth;
-      const xPercentageInFrame = Number(((xDistanceToBoundary / totalXTravel) * 100).toFixed(3));
+      const totalYTrack = frame.height + nodeHeight;
+      const yDistanceToFrame = nodeTop + nodeHeight;
+      const yPercentageInFrame = (yDistanceToFrame / totalYTrack) * 100;
+
+      const totalPercentageInFrame = (xPercentageInFrame + yPercentageInFrame) / 2;
+
       const xIsInFrame = nodeRight >= frame.left && nodeLeft <= frame.right;
-
-      const totalPercentageInFrame = Number(((xPercentageInFrame + yPercentageInFrame) / 2).toFixed(3));
-      const nodeIsInFrame = xIsInFrame && yIsInFrame;
+      const yIsInFrame = nodeTop <= frame.bottom && nodeBottom >= frame.top;
+      const isInFrame = xIsInFrame && yIsInFrame;
 
       return {
+        totalXTrack,
+        totalYTrack,
+        xDistanceToFrame,
+        yDistanceToFrame,
         xIsInFrame,
         yIsInFrame,
         xPercentageInFrame,
         yPercentageInFrame,
         totalPercentageInFrame,
-        nodeIsInFrame,
+        isInFrame,
       };
     }
 
@@ -158,12 +167,16 @@ const withNodeInfo = (PassedComponent) => {
     render() {
       const {
         nodeRect,
+        totalXTrack,
+        totalYTrack,
+        xDistanceToFrame,
+        yDistanceToFrame,
         xIsInFrame,
         yIsInFrame,
         xPercentageInFrame,
         yPercentageInFrame,
         totalPercentageInFrame,
-        nodeIsInFrame,
+        isInFrame,
       } = this.state;
 
       const passedProps = { ...this.props };
@@ -176,12 +189,16 @@ const withNodeInfo = (PassedComponent) => {
           ref={this.nodeRef}
           nodeInfo={{
             nodeRect,
+            totalXTrack,
+            totalYTrack,
+            xDistanceToFrame,
+            yDistanceToFrame,
             xIsInFrame,
             yIsInFrame,
             xPercentageInFrame,
             yPercentageInFrame,
             totalPercentageInFrame,
-            nodeIsInFrame,
+            isInFrame,
           }}
           {...passedProps}
         />
