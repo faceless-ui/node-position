@@ -1,8 +1,8 @@
-[![NPM](https://img.shields.io/npm/v/@trbl/react-node-info)](https://www.npmjs.com/@trbl/react-node-info)
-![Bundle Size](https://img.shields.io/bundlephobia/minzip/@trbl/react-node-info?label=zipped)
+[![NPM](https://img.shields.io/npm/v/@trbl/react-node-position)](https://www.npmjs.com/@trbl/react-node-position)
+![Bundle Size](https://img.shields.io/bundlephobia/minzip/@trbl/react-node-position?label=zipped)
 [![Supported by TRBL](https://img.shields.io/badge/supported_by-TRBL-black)](https://github.com/trouble)
 
-# React Node Info
+# React Node Position
 
 Send nodes.
 
@@ -11,24 +11,24 @@ Send nodes.
 ### Installation
 
 ```bash
-$ yarn add @trbl/react-node-info
+$ yarn add @trbl/react-node-position
 ```
 
 ### Compositon
 
 ```jsx
   import React from 'react';
-  import { NodeInfoProvider, withNodeInfo } from '@trbl/react-node-info';
+  import { NodePositionProvider, withNodePosition } from '@trbl/react-node-position';
 
-  const MyComponent = withNodeInfo(forwardRef(props, ref) => return <div ref={ref}>My Component</div>));
+  const MyComponent = withNodePosition(forwardRef(props, ref) => return <div ref={ref}>My Component</div>));
 
   const App = () => {
     return (
-      <NodeInfoProvider>
+      <NodePositionProvider>
         <MyComponent>
           ...
         </MyComponent>
-      </NodeInfoProvider>
+      </NodePositionProvider>
     )
   }
 
@@ -49,9 +49,9 @@ $ open http://localhost:3000
 
 All available props can be found via the references below:
 
-  - [NodeInfoProvider](/src/NodeInfoProvider/README.md)
-  - [withNodeInfo](/src/withNodeInfo/README.md)
+  - [NodePositionProvider](/src/NodePositionProvider/README.md)
+  - [withNodePosition](/src/withNodePosition/README.md)
 
 ## License
 
-[MIT](https://github.com/trouble/react-node-info/blob/master/LICENSE) Copyright (c) TRBL, LLC
+[MIT](https://github.com/trouble/react-node-position/blob/master/LICENSE) Copyright (c) TRBL, LLC

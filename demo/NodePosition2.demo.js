@@ -1,10 +1,10 @@
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import withNodeInfo from '../src/withNodeInfo';
+import withNodePosition from '../src/withNodePosition';
 
-const NodeInfoDemo2 = forwardRef((props, ref) => {
+const NodePositionDemo2 = forwardRef((props, ref) => {
   const {
-    nodeInfo: {
+    nodePosition: {
       nodeRect: {
         width,
         height,
@@ -35,7 +35,7 @@ const NodeInfoDemo2 = forwardRef((props, ref) => {
       }}
     >
       <pre>
-        {'nodeInfo: {'}
+        {'nodePosition: {'}
         <br />
         &emsp;
         {'nodeRect: {'}
@@ -97,10 +97,10 @@ const NodeInfoDemo2 = forwardRef((props, ref) => {
   );
 });
 
-NodeInfoDemo2.defaultProps = {};
+NodePositionDemo2.defaultProps = {};
 
-NodeInfoDemo2.propTypes = {
-  nodeInfo: PropTypes.shape({
+NodePositionDemo2.propTypes = {
+  nodePosition: PropTypes.shape({
     nodeRect: PropTypes.shape({
       width: PropTypes.number,
       height: PropTypes.number,
@@ -122,4 +122,4 @@ NodeInfoDemo2.propTypes = {
   }).isRequired,
 };
 
-export default withNodeInfo(NodeInfoDemo2);
+export default withNodePosition(NodePositionDemo2);

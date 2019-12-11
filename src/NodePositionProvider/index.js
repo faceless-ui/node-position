@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { WindowInfoProvider } from '@trbl/react-window-info';
 import { ScrollInfoProvider } from '@trbl/react-scroll-info';
-import NodeInfoContext from './context';
+import NodePositionContext from './context';
 
-const NodeInfoProvider = (props) => {
+const NodePositionProvider = (props) => {
   const {
     children,
     frameOffset,
@@ -13,21 +13,21 @@ const NodeInfoProvider = (props) => {
   return (
     <WindowInfoProvider>
       <ScrollInfoProvider>
-        <NodeInfoContext.Provider value={{ frameOffset }}>
+        <NodePositionContext.Provider value={{ frameOffset }}>
           {children}
-        </NodeInfoContext.Provider>
+        </NodePositionContext.Provider>
       </ScrollInfoProvider>
     </WindowInfoProvider>
   );
 };
 
-NodeInfoProvider.defaultProps = {
+NodePositionProvider.defaultProps = {
   frameOffset: 0,
 };
 
-NodeInfoProvider.propTypes = {
+NodePositionProvider.propTypes = {
   children: PropTypes.node.isRequired,
   frameOffset: PropTypes.number,
 };
 
-export default NodeInfoProvider;
+export default NodePositionProvider;

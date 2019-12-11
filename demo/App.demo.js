@@ -1,14 +1,14 @@
 import React from 'react';
-import { NodeInfoProvider } from '../src'; // swap '../src' for '../dist/build.bundle' to demo production build
-import NodeInfoDemo1 from './NodeInfo1.demo';
-import NodeInfoDemo2 from './NodeInfo2.demo';
+import { NodePositionProvider } from '../src'; // swap '../src' for '../dist/build.bundle' to demo production build
+import NodePositionDemo1 from './NodePosition1.demo';
+import NodePositionDemo2 from './NodePosition2.demo';
 
 const AppDemo = () => {
   return (
-    <NodeInfoProvider frameOffset={100}>
-      <NodeInfoDemo1 demoProp="demo" />
+    <NodePositionProvider frameOffset={100}>
+      <NodePositionDemo1 demoProp="demo" />
       <div style={{ padding: '125vh 125vw', display: 'flex' }}>
-        <NodeInfoDemo2 />
+        <NodePositionDemo2 />
       </div>
       <div
         style={{
@@ -20,7 +20,7 @@ const AppDemo = () => {
           outline: 'dashed rgba(0, 0, 0, .15) 2px',
         }}
       />
-    </NodeInfoProvider>
+    </NodePositionProvider>
   );
 };
 
