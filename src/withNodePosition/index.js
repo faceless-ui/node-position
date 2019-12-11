@@ -2,9 +2,9 @@ import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { withWindowInfo } from '@trbl/react-window-info';
 import { withScrollInfo } from '@trbl/react-scroll-info';
-import NodeInfoContext from '../NodeInfoProvider/context';
+import NodePositionContext from '../NodePositionProvider/context';
 
-const withNodeInfo = (PassedComponent) => {
+const withNodePosition = (PassedComponent) => {
   class Node extends Component {
     constructor(props) {
       super(props);
@@ -126,11 +126,11 @@ const withNodeInfo = (PassedComponent) => {
         const { width, height, top, right, bottom, left } = DOMRect;
         const nodeRect = { width, height, top, right, bottom, left }; // create a new, plain object from the DOMRect object type
 
-        const nodeInfo = this.interpretNodeRect(nodeRect);
+        const nodePosition = this.interpretNodeRect(nodeRect);
 
         this.setState({
           nodeRect,
-          ...nodeInfo,
+          ...nodePosition,
         });
       }
     }
@@ -157,11 +157,11 @@ const withNodeInfo = (PassedComponent) => {
         left: nodeRect.left - xDifference,
       };
 
-      const nodeInfo = this.interpretNodeRect(newNodeRect);
+      const nodePosition = this.interpretNodeRect(newNodeRect);
 
       this.setState({
         nodeRect: newNodeRect,
-        ...nodeInfo,
+        ...nodePosition,
       });
     }
 
@@ -173,14 +173,14 @@ const withNodeInfo = (PassedComponent) => {
       return (
         <PassedComponent
           ref={this.nodeRef}
-          nodeInfo={{ ...this.state }}
+          nodePosition={{ ...this.state }}
           {...passedProps}
         />
       );
     }
   }
 
-  Node.contextType = NodeInfoContext;
+  Node.contextType = NodePositionContext;
 
   Node.defaultProps = {
   };
@@ -201,4 +201,4 @@ const withNodeInfo = (PassedComponent) => {
   return withWindowInfo(withScrollInfo(Node));
 };
 
-export default withNodeInfo;
+export default withNodePosition;

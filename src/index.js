@@ -1,2 +1,2 @@
-export { default as NodeInfoProvider } from './NodeInfoProvider';
-export { default as withNodeInfo } from './withNodeInfo';
+export { default as NodePositionProvider } from './NodePositionProvider';
+export { default as withNodePosition } from './withNodePosition';
