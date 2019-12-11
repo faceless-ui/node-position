@@ -20,7 +20,7 @@ $ yarn add @trbl/react-node-info
   import React from 'react';
   import { NodeInfoProvider, withNodeInfo } from '@trbl/react-node-info';
 
-  const MyComponent = withNodeInfo(() => return <div>My Component</div>);
+  const MyComponent = withNodeInfo(forwardRef(props, ref) => return <div ref={ref}>My Component</div>));
 
   const App = () => {
     return (

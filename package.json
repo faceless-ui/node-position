@@ -24,8 +24,8 @@
     "react": "^16.8.0"
   },
   "dependencies": {
-    "@trbl/react-window-info": "^0.0.9",
-    "@trbl/react-scroll-info": "^0.0.15",
+    "@trbl/react-scroll-info": "^0.0.16",
+    "@trbl/react-window-info": "^0.0.10",
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0"

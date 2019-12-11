@@ -110,7 +110,7 @@ NodeInfoDemo1.propTypes = {
       left: PropTypes.number,
     }),
     totalXTrack: PropTypes.number,
-    totalYTrack: PropTypes.bool,
+    totalYTrack: PropTypes.number,
     xDistanceToFrame: PropTypes.number,
     yDistanceToFrame: PropTypes.number,
     xIsInFrame: PropTypes.bool,

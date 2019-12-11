@@ -2,6 +2,7 @@ import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { withWindowInfo } from '@trbl/react-window-info';
 import { withScrollInfo } from '@trbl/react-scroll-info';
+import NodeInfoContext from '../NodeInfoProvider/context';
 
 const withNodeInfo = (PassedComponent) => {
   class Node extends Component {
@@ -25,10 +26,10 @@ const withNodeInfo = (PassedComponent) => {
         yDistanceToFrame: 0,
         xIsInFrame: false,
         yIsInFrame: false,
+        isInFrame: false,
         xPercentageInFrame: 0,
         yPercentageInFrame: 0,
         totalPercentageInFrame: 0,
-        isInFrame: false,
       };
     }
 
@@ -52,22 +53,23 @@ const withNodeInfo = (PassedComponent) => {
       }
 
       if (scrollEvents !== prevScrollEvents) {
-        if (scrollEvents > 1) {
-          this.trackNodePosition();
-        } else {
-          this.queryNodePosition();
-        }
+        // The getBoundingClientRect received on mount in Chrome is calculated relative to the cached scroll position (if present),
+        // so tracking against it before the first scroll event would lead to desynchronization unless queryNodePosition
+        // is run on the first scroll event, which allows for accurate, safe tracking on all subsequent events.
+        if (scrollEvents <= 1) this.queryNodePosition();
+        else this.trackNodePosition();
       }
     }
 
-    calculateFrameInfo = (nodeRect) => {
+    interpretNodeRect = (nodeRect) => {
       const {
-        threshold,
         windowInfo: {
           width: windowWidth,
           height: windowHeight,
         },
       } = this.props;
+
+      const { frameOffset } = this.context;
 
       const {
         width: nodeWidth,
@@ -79,21 +81,21 @@ const withNodeInfo = (PassedComponent) => {
       } = nodeRect;
 
       const frame = {
-        width: windowWidth - (threshold * 2),
-        height: windowHeight - (threshold * 2),
-        top: threshold,
-        right: threshold ? windowWidth - threshold : windowWidth,
-        bottom: threshold ? windowHeight - threshold : windowHeight,
-        left: threshold,
+        width: windowWidth - (frameOffset * 2),
+        height: windowHeight - (frameOffset * 2),
+        top: frameOffset,
+        right: frameOffset ? windowWidth - frameOffset : windowWidth,
+        bottom: frameOffset ? windowHeight - frameOffset : windowHeight,
+        left: frameOffset,
       };
 
       const totalXTrack = frame.width + nodeWidth;
-      const xDistanceToFrame = nodeLeft + nodeWidth;
-      const xPercentageInFrame = (xDistanceToFrame / totalXTrack) * 100;
+      const xDistanceToFrame = nodeRight - frame.left; // note: the chosen variable name is not the most semantic (nodeRightToFrameLeftDistance || distanceToFrameXExit)
+      const xPercentageInFrame = ((xDistanceToFrame / totalXTrack) * 100) || 0; // conditional assignment for cases where 0 / 0 === NaN
 
       const totalYTrack = frame.height + nodeHeight;
-      const yDistanceToFrame = nodeTop + nodeHeight;
-      const yPercentageInFrame = (yDistanceToFrame / totalYTrack) * 100;
+      const yDistanceToFrame = nodeBottom - frame.top; // note: the chosen variable name is not the most semantic (nodeBottomToFrameTopDistance || distanceToFrameYExit)
+      const yPercentageInFrame = ((yDistanceToFrame / totalYTrack) * 100) || 0; // conditional assignment for cases where 0 / 0 === NaN
 
       const totalPercentageInFrame = (xPercentageInFrame + yPercentageInFrame) / 2;
 
@@ -117,20 +119,18 @@ const withNodeInfo = (PassedComponent) => {
 
     // true positions
     queryNodePosition = () => {
-      const {
-        current: node,
-      } = this.nodeRef;
+      const { current: node } = this.nodeRef;
 
       if (node) {
-        const DOMRect = node.getBoundingClientRect(); // clientRect because its relative to the vieport
+        const DOMRect = node.getBoundingClientRect(); // clientRect, relative to the vieport
         const { width, height, top, right, bottom, left } = DOMRect;
-        const nodeRect = { width, height, top, right, bottom, left }; // create a new, plain object from the DOMRect object
+        const nodeRect = { width, height, top, right, bottom, left }; // create a new, plain object from the DOMRect object type
 
-        const frameInfo = this.calculateFrameInfo(nodeRect);
+        const nodeInfo = this.interpretNodeRect(nodeRect);
 
         this.setState({
           nodeRect,
-          ...frameInfo,
+          ...nodeInfo,
         });
       }
     }
@@ -144,10 +144,11 @@ const withNodeInfo = (PassedComponent) => {
         },
       } = this.props;
 
-      const {
-        nodeRect,
-      } = this.state;
+      const { nodeRect } = this.state;
 
+      // TODO: consider adjusting the newNodeRect to account for potential changes in the node dimensions.
+      // i.e. if the node's width or height changed at any point during synthetic tracking, these tracked values become innacurate.
+      // A performance hit for this feature is the necessary use of the clientWidth and clientHeight methods on every scroll.
       const newNodeRect = {
         ...nodeRect, // inherit width and height
         top: nodeRect.top - yDifference,
@@ -156,62 +157,35 @@ const withNodeInfo = (PassedComponent) => {
         left: nodeRect.left - xDifference,
       };
 
-      const frameInfo = this.calculateFrameInfo(newNodeRect);
+      const nodeInfo = this.interpretNodeRect(newNodeRect);
 
       this.setState({
         nodeRect: newNodeRect,
-        ...frameInfo,
+        ...nodeInfo,
       });
     }
 
     render() {
-      const {
-        nodeRect,
-        totalXTrack,
-        totalYTrack,
-        xDistanceToFrame,
-        yDistanceToFrame,
-        xIsInFrame,
-        yIsInFrame,
-        xPercentageInFrame,
-        yPercentageInFrame,
-        totalPercentageInFrame,
-        isInFrame,
-      } = this.state;
-
       const passedProps = { ...this.props };
       delete passedProps.windowInfo;
       delete passedProps.scrollInfo;
-      delete passedProps.threshold;
 
       return (
         <PassedComponent
           ref={this.nodeRef}
-          nodeInfo={{
-            nodeRect,
-            totalXTrack,
-            totalYTrack,
-            xDistanceToFrame,
-            yDistanceToFrame,
-            xIsInFrame,
-            yIsInFrame,
-            xPercentageInFrame,
-            yPercentageInFrame,
-            totalPercentageInFrame,
-            isInFrame,
-          }}
+          nodeInfo={{ ...this.state }}
           {...passedProps}
         />
       );
     }
   }
 
+  Node.contextType = NodeInfoContext;
+
   Node.defaultProps = {
-    threshold: 0,
   };
 
   Node.propTypes = {
-    threshold: PropTypes.number,
     scrollInfo: PropTypes.shape({
       xDifference: PropTypes.number,
       yDifference: PropTypes.number,
