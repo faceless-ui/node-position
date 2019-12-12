@@ -20,6 +20,8 @@ const withNodePosition = (PassedComponent) => {
           bottom: 0,
           left: 0,
         },
+        totalXOffset: 0,
+        totalYOffset: 0,
         totalXTrack: 0,
         totalYTrack: 0,
         xDistanceToFrame: 0,
@@ -63,6 +65,10 @@ const withNodePosition = (PassedComponent) => {
 
     interpretNodeRect = (nodeRect) => {
       const {
+        scrollInfo: {
+          x: scrollX,
+          y: scrollY,
+        },
         windowInfo: {
           width: windowWidth,
           height: windowHeight,
@@ -89,6 +95,9 @@ const withNodePosition = (PassedComponent) => {
         left: frameOffset,
       };
 
+      const totalXOffset = scrollX + nodeLeft;
+      const totalYOffset = scrollY + nodeTop;
+
       const totalXTrack = frame.width + nodeWidth;
       const xDistanceToFrame = nodeRight - frame.left; // note: the chosen variable name is not the most semantic (nodeRightToFrameLeftDistance || distanceToFrameXExit)
       const xPercentageInFrame = ((xDistanceToFrame / totalXTrack) * 100) || 0; // conditional assignment for cases where 0 / 0 === NaN
@@ -104,6 +113,8 @@ const withNodePosition = (PassedComponent) => {
       const isInFrame = xIsInFrame && yIsInFrame;
 
       return {
+        totalXOffset,
+        totalYOffset,
         totalXTrack,
         totalYTrack,
         xDistanceToFrame,
@@ -187,6 +198,8 @@ const withNodePosition = (PassedComponent) => {
 
   Node.propTypes = {
     scrollInfo: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number,
       xDifference: PropTypes.number,
       yDifference: PropTypes.number,
       eventsFired: PropTypes.number,

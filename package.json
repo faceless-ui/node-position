@@ -1,6 +1,6 @@
 {
   "name": "@trbl/react-node-position",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "dist/build.bundle.js",
   "repository": "git@github.com:trouble/react-node-position.git",
   "description": "Send nodes.",
