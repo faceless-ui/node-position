@@ -26,8 +26,8 @@ NodePositionProvider.defaultProps = {
 };
 
 NodePositionProvider.propTypes = {
-  children: PropTypes.node.isRequired,
   frameOffset: PropTypes.number,
+  children: PropTypes.node.isRequired,
 };
 
 export default NodePositionProvider;

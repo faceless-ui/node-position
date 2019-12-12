@@ -1,6 +1,6 @@
 {
   "name": "@trbl/react-node-position",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "dist/build.bundle.js",
   "repository": "git@github.com:trouble/react-node-position.git",
   "description": "Send nodes.",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@trbl/react-scroll-info": "^0.0.16",
-    "@trbl/react-window-info": "^0.0.10",
+    "@trbl/react-window-info": "^0.0.11",
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0"
