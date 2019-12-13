@@ -13,6 +13,8 @@ const NodePositionDemo2 = forwardRef((props, ref) => {
         bottom,
         left,
       },
+      totalXOffset,
+      totalYOffset,
       totalXTrack,
       totalYTrack,
       xDistanceToFrame,
@@ -62,6 +64,12 @@ const NodePositionDemo2 = forwardRef((props, ref) => {
         {'},'}
         <br />
         &emsp;
+        {`totalXOffset: ${totalXOffset},`}
+        <br />
+        &emsp;
+        {`totalYOffset: ${totalYOffset},`}
+        <br />
+        &emsp;
         {`totalXTrack: ${totalXTrack},`}
         <br />
         &emsp;
@@ -109,6 +117,8 @@ NodePositionDemo2.propTypes = {
       bottom: PropTypes.number,
       left: PropTypes.number,
     }),
+    totalXOffset: PropTypes.number,
+    totalYOffset: PropTypes.number,
     totalXTrack: PropTypes.number,
     totalYTrack: PropTypes.number,
     xDistanceToFrame: PropTypes.number,

@@ -18,6 +18,8 @@ const withNodePosition = (PassedComponent) => {
       left: 0,
     });
 
+    const [totalXOffset, setTotalXOffset] = useState(0);
+    const [totalYOffset, setTotalYOffset] = useState(0);
     const [totalXTrack, setTotalXTrack] = useState(0);
     const [totalYTrack, setTotalYTrack] = useState(0);
 
@@ -41,6 +43,8 @@ const withNodePosition = (PassedComponent) => {
         eventsFired: scrollEvents,
         xDifference,
         yDifference,
+        x: scrollX,
+        y: scrollY,
       },
     } = props;
 
@@ -83,6 +87,8 @@ const withNodePosition = (PassedComponent) => {
         left: frameOffset,
       };
 
+      setTotalXOffset(scrollX + nodeLeft);
+      setTotalYOffset(scrollY + nodeTop);
       setTotalXTrack(frame.width + nodeWidth);
       setTotalYTrack(frame.height + nodeHeight);
       setXDistanceToFrame(nodeRight - frame.left); // note: the chosen variable name is not the most semantic (nodeRightToFrameLeftDistance || distanceToFrameXExit;
@@ -93,13 +99,15 @@ const withNodePosition = (PassedComponent) => {
       setXIsInFrame(nodeRight >= frame.left && nodeLeft <= frame.right);
       setYIsInFrame(nodeTop <= frame.bottom && nodeBottom >= frame.top);
       setIsInFrame(xIsInFrame && yIsInFrame);
-    }, [frameOffset, nodeRect, windowWidth, windowHeight, totalXTrack, totalYTrack, xDistanceToFrame, yDistanceToFrame, xPercentageInFrame, yPercentageInFrame, xIsInFrame, yIsInFrame]);
+    }, [frameOffset, nodeRect, windowWidth, windowHeight, totalXTrack, totalYTrack, xDistanceToFrame, yDistanceToFrame, xPercentageInFrame, yPercentageInFrame, xIsInFrame, yIsInFrame, scrollX, scrollY]);
 
     return (
       <PassedComponent
         ref={nodeRef}
         nodePosition={{
           nodeRect,
+          totalXOffset,
+          totalYOffset,
           totalXTrack,
           totalYTrack,
           xDistanceToFrame,
@@ -118,6 +126,8 @@ const withNodePosition = (PassedComponent) => {
 
   Node.propTypes = {
     scrollInfo: PropTypes.shape({
+      x: PropTypes.number,
+      y: PropTypes.number,
       xDifference: PropTypes.number,
       yDifference: PropTypes.number,
       eventsFired: PropTypes.number,
