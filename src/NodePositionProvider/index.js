@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { WindowInfoProvider } from '@trbl/react-window-info';
 import { ScrollInfoProvider } from '@trbl/react-scroll-info';
@@ -8,16 +8,27 @@ const NodePositionProvider = (props) => {
   const {
     children,
     frameOffset,
+    scrollInfoOverride,
+    windowInfoOverride,
   } = props;
 
+  const WindowInfoProviderComponent = windowInfoOverride ? Fragment : WindowInfoProvider;
+  const ScrollInfoProviderComponent = scrollInfoOverride ? Fragment : ScrollInfoProvider;
+
+  const nodePositionContext = { frameOffset };
+  if (windowInfoOverride) nodePositionContext.windowInfo = { ...windowInfoOverride.windowInfo };
+  if (scrollInfoOverride) nodePositionContext.scrollInfo = { ...scrollInfoOverride.scrollInfo };
+
   return (
-    <WindowInfoProvider>
-      <ScrollInfoProvider>
-        <NodePositionContext.Provider value={{ frameOffset }}>
+    <WindowInfoProviderComponent>
+      <ScrollInfoProviderComponent>
+        <NodePositionContext.Provider
+          value={nodePositionContext}
+        >
           {children}
         </NodePositionContext.Provider>
-      </ScrollInfoProvider>
-    </WindowInfoProvider>
+      </ScrollInfoProviderComponent>
+    </WindowInfoProviderComponent>
   );
 };
 
@@ -28,6 +39,12 @@ NodePositionProvider.defaultProps = {
 NodePositionProvider.propTypes = {
   frameOffset: PropTypes.number,
   children: PropTypes.node.isRequired,
+  scrollInfoOverride: PropTypes.shape({
+    scrollInfo: PropTypes.shape({}),
+  }).isRequired,
+  windowInfoOverride: PropTypes.shape({
+    windowInfo: PropTypes.shape({}),
+  }).isRequired,
 };
 
 export default NodePositionProvider;

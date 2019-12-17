@@ -1,8 +1,6 @@
 import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
-import { withWindowInfo } from '@trbl/react-window-info';
-import { withScrollInfo } from '@trbl/react-scroll-info';
-import NodePositionContext from '../NodePositionProvider/context';
+import withNodePositionContext from '../withNodePositionContext';
 
 const withNodePosition = (PassedComponent) => {
   class Node extends Component {
@@ -65,6 +63,7 @@ const withNodePosition = (PassedComponent) => {
 
     interpretNodeRect = (nodeRect) => {
       const {
+        frameOffset,
         scrollInfo: {
           x: scrollX,
           y: scrollY,
@@ -74,8 +73,6 @@ const withNodePosition = (PassedComponent) => {
           height: windowHeight,
         },
       } = this.props;
-
-      const { frameOffset } = this.context;
 
       const {
         width: nodeWidth,
@@ -191,12 +188,8 @@ const withNodePosition = (PassedComponent) => {
     }
   }
 
-  Node.contextType = NodePositionContext;
-
-  Node.defaultProps = {
-  };
-
   Node.propTypes = {
+    frameOffset: PropTypes.number.isRequired,
     scrollInfo: PropTypes.shape({
       x: PropTypes.number,
       y: PropTypes.number,
@@ -211,7 +204,7 @@ const withNodePosition = (PassedComponent) => {
     }).isRequired,
   };
 
-  return withWindowInfo(withScrollInfo(Node));
+  return withNodePositionContext(Node);
 };
 
 export default withNodePosition;
