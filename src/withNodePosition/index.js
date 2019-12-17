@@ -35,10 +35,6 @@ const withNodePosition = (PassedComponent) => {
       };
     }
 
-    componentDidMount() {
-      this.queryNodePosition();
-    }
-
     componentDidUpdate(prevProps) {
       const {
         scrollInfo: { eventsFired: scrollEvents },
