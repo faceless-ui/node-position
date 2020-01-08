@@ -14,7 +14,7 @@ Send nodes.
 $ yarn add @trbl/react-node-position
 ```
 
-### Compositon
+### Composition
 
 ```jsx
   import React from 'react';
@@ -40,8 +40,8 @@ $ yarn add @trbl/react-node-position
 To demo locally, clone the repo and
 
 ```bash
-$ yarn install
-$ npm run dev
+$ yarn
+$ yarn dev
 $ open http://localhost:3000
 ```
 
