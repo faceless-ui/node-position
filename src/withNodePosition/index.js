@@ -73,15 +73,6 @@ const withNodePosition = (PassedComponent) => {
 
       const { frameOffset } = this.context;
 
-      const {
-        width: nodeWidth,
-        height: nodeHeight,
-        top: nodeTop,
-        right: nodeRight,
-        bottom: nodeBottom,
-        left: nodeLeft,
-      } = nodeRect;
-
       const frame = {
         width: windowWidth - (frameOffset * 2),
         height: windowHeight - (frameOffset * 2),
@@ -91,21 +82,21 @@ const withNodePosition = (PassedComponent) => {
         left: frameOffset,
       };
 
-      const totalXOffset = scrollX + nodeLeft;
-      const totalYOffset = scrollY + nodeTop;
+      const totalXOffset = scrollX + nodeRect.left;
+      const totalYOffset = scrollY + nodeRect.top;
 
-      const totalXTrack = frame.width + nodeWidth;
-      const xDistanceToFrame = nodeRight - frame.left; // note: the chosen variable name is not the most semantic (nodeRightToFrameLeftDistance || distanceToFrameXExit)
+      const totalXTrack = frame.width + nodeRect.width;
+      const xDistanceToFrame = nodeRect.right - frame.left; // note: the chosen variable name is not the most semantic (nodeRightToFrameLeftDistance || distanceToFrameXExit)
       const xPercentageInFrame = ((xDistanceToFrame / totalXTrack) * 100) || 0; // conditional assignment for cases where 0 / 0 === NaN
 
-      const totalYTrack = frame.height + nodeHeight;
-      const yDistanceToFrame = nodeBottom - frame.top; // note: the chosen variable name is not the most semantic (nodeBottomToFrameTopDistance || distanceToFrameYExit)
+      const totalYTrack = frame.height + nodeRect.height;
+      const yDistanceToFrame = nodeRect.bottom - frame.top; // note: the chosen variable name is not the most semantic (nodeBottomToFrameTopDistance || distanceToFrameYExit)
       const yPercentageInFrame = ((yDistanceToFrame / totalYTrack) * 100) || 0; // conditional assignment for cases where 0 / 0 === NaN
 
       const totalPercentageInFrame = (xPercentageInFrame + yPercentageInFrame) / 2;
 
-      const xIsInFrame = nodeRight >= frame.left && nodeLeft <= frame.right;
-      const yIsInFrame = nodeTop <= frame.bottom && nodeBottom >= frame.top;
+      const xIsInFrame = nodeRect.right >= frame.left && nodeRect.left <= frame.right;
+      const yIsInFrame = nodeRect.top <= frame.bottom && nodeRect.bottom >= frame.top;
       const isInFrame = xIsInFrame && yIsInFrame;
 
       return {
@@ -153,9 +144,6 @@ const withNodePosition = (PassedComponent) => {
 
       const { nodeRect } = this.state;
 
-      // TODO: consider adjusting the newNodeRect to account for potential changes in the node dimensions.
-      // i.e. if the node's width or height changed at any point during synthetic tracking, these tracked values become innacurate.
-      // A performance hit for this feature is the necessary use of the clientWidth and clientHeight methods on every scroll.
       const newNodeRect = {
         ...nodeRect, // inherit width and height
         top: nodeRect.top - yDifference,
@@ -189,8 +177,7 @@ const withNodePosition = (PassedComponent) => {
 
   Node.contextType = NodePositionContext;
 
-  Node.defaultProps = {
-  };
+  Node.defaultProps = {};
 
   Node.propTypes = {
     scrollInfo: PropTypes.shape({

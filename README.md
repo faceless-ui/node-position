@@ -20,7 +20,7 @@ $ yarn add @trbl/react-node-position
   import React from 'react';
   import { NodePositionProvider, withNodePosition } from '@trbl/react-node-position';
 
-  const MyComponent = withNodePosition(forwardRef(props, ref) => return <div ref={ref}>My Component</div>));
+  const MyComponent = withNodePosition(forwardRef((props, ref) => <div ref={ref}>My Component</div>));
 
   const App = () => {
     return (
@@ -49,8 +49,8 @@ $ open http://localhost:3000
 
 All available props can be found via the references below:
 
-  - [NodePositionProvider](/src/NodePositionProvider/README.md)
-  - [withNodePosition](/src/withNodePosition/README.md)
+  - [NodePositionProvider](./src/NodePositionProvider/README.md)
+  - [withNodePosition](./src/withNodePosition/README.md)
 
 ## Contribution
 

@@ -34,6 +34,7 @@ const NodePositionDemo1 = forwardRef((props, ref) => {
       style={{
         backgroundColor: 'rgba(0, 0, 0, .15)',
         display: 'inline-block',
+        padding: '10px',
       }}
     >
       <pre>
