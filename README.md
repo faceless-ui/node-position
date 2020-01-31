@@ -49,8 +49,8 @@ $ open http://localhost:3000
 
 All available props can be found via the references below:
 
-  - [NodePositionProvider](/src/NodePositionProvider/README.md)
-  - [withNodePosition](/src/withNodePosition/README.md)
+  - [NodePositionProvider](./src/NodePositionProvider/README.md)
+  - [withNodePosition](./src/withNodePosition/README.md)
 
 ## Contribution
 

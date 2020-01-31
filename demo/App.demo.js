@@ -5,9 +5,9 @@ import NodePositionDemo2 from './NodePosition2.demo';
 
 const AppDemo = () => (
   <NodePositionProvider frameOffset={100}>
-    <NodePositionDemo1 demoProp="demo" />
+    <NodePositionDemo2 demoProp="demo" />
     <div style={{ padding: '125vh 125vw', display: 'flex' }}>
-      <NodePositionDemo2 />
+      <NodePositionDemo1 />
     </div>
     <div
       style={{
