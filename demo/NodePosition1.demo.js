@@ -39,4 +39,4 @@ NodePositionDemo1.propTypes = {
   }).isRequired,
 };
 
-export default withNodePosition(NodePositionDemo1);
+export default withNodePosition(NodePositionDemo1, { trackOutOfFrame: true });

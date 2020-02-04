@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { WindowInfoProvider } from '@trbl/react-window-info';
-import { ScrollInfoProvider } from '@trbl/react-scroll-info';
+import { WindowInfoProvider, WindowInfoContext } from '@trbl/react-window-info';
+import { ScrollInfoProvider, ScrollInfoContext } from '@trbl/react-scroll-info';
 import NodePositionContext from './context';
 
 const NodePositionProvider = (props) => {
@@ -9,11 +9,24 @@ const NodePositionProvider = (props) => {
 
   return (
     <WindowInfoProvider>
-      <ScrollInfoProvider>
-        <NodePositionContext.Provider>
-          {children && children}
-        </NodePositionContext.Provider>
-      </ScrollInfoProvider>
+      <WindowInfoContext.Consumer>
+        {(windowInfo) => (
+          <ScrollInfoProvider>
+            <ScrollInfoContext.Consumer>
+              {(scrollInfo) => (
+                <NodePositionContext.Provider
+                  value={{
+                    ...windowInfo,
+                    ...scrollInfo,
+                  }}
+                >
+                  {children && children}
+                </NodePositionContext.Provider>
+              )}
+            </ScrollInfoContext.Consumer>
+          </ScrollInfoProvider>
+        )}
+      </WindowInfoContext.Consumer>
     </WindowInfoProvider>
   );
 };

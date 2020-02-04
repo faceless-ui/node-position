@@ -21,6 +21,7 @@ class NodePositionDemo2 extends Component {
             summary="Node 2"
             nodePosition={nodePosition}
             color={backgroundColor}
+            open
           />,
           detailsContainer.current,
         )}

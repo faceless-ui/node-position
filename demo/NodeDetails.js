@@ -22,6 +22,8 @@ const NodeDetails = (props) => {
       intersectionRatio,
       xIntersectionRatio,
       yIntersectionRatio,
+      xPlaneIntersectionRatio,
+      yPlaneIntersectionRatio,
       displacementRatio,
       xDisplacementRatio,
       yDisplacementRatio,
@@ -113,6 +115,12 @@ const NodeDetails = (props) => {
         {`yIntersectionRatio: ${yIntersectionRatio},`}
         <br />
         &emsp;
+        {`xPlaneIntersectionRatio: ${xPlaneIntersectionRatio},`}
+        <br />
+        &emsp;
+        {`yPlaneIntersectionRatio: ${yPlaneIntersectionRatio},`}
+        <br />
+        &emsp;
         {`displacementRatio: ${displacementRatio},`}
         <br />
         &emsp;
@@ -161,6 +169,8 @@ NodeDetails.propTypes = {
     xIntersectionRatio: PropTypes.number,
     yIntersectionRatio: PropTypes.number,
     displacementRatio: PropTypes.number,
+    xPlaneIntersectionRatio: PropTypes.number,
+    yPlaneIntersectionRatio: PropTypes.number,
     xDisplacementRatio: PropTypes.number,
     yDisplacementRatio: PropTypes.number,
     totalOffsetLeft: PropTypes.number,

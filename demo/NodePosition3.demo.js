@@ -19,11 +19,11 @@ const NodePositionDemo3 = forwardRef((props, ref) => {
     <Fragment>
       {detailsContainer.current && createPortal(
         <NodeDetails
-          open
           summary="Node 3"
           options={options}
           nodePosition={nodePosition}
           color={backgroundColor}
+          open
         />,
         detailsContainer.current,
       )}
