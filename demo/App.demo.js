@@ -1,25 +1,40 @@
-import React from 'react';
+import React, { createRef } from 'react';
 import { NodePositionProvider } from '../src'; // swap '../src' for '../dist/build.bundle' to demo production build
 import NodePositionDemo1 from './NodePosition1.demo';
 import NodePositionDemo2 from './NodePosition2.demo';
+import NodePositionDemo3 from './NodePosition3.demo';
 
-const AppDemo = () => (
-  <NodePositionProvider frameOffset={100}>
-    <NodePositionDemo2 demoProp="demo" />
-    <div style={{ padding: '125vh 125vw', display: 'flex' }}>
-      <NodePositionDemo1 />
-    </div>
-    <div
-      style={{
-        position: 'fixed',
-        top: '100px',
-        right: '100px',
-        bottom: '100px',
-        left: '100px',
-        outline: 'dashed rgba(0, 0, 0, .15) 2px',
-      }}
-    />
-  </NodePositionProvider>
-);
+const AppDemo = () => {
+  const detailsContainer = createRef(null);
+
+  return (
+    <NodePositionProvider frameOffset={100}>
+      <div
+        ref={detailsContainer}
+        id="details-container"
+        style={{
+          padding: '10px',
+          position: 'fixed',
+          top: '0',
+          left: '0',
+          height: '100%',
+          overflow: 'scroll',
+        }}
+      />
+      <div style={{ height: '110vh' }} />
+      <NodePositionDemo1 detailsContainer={detailsContainer} />
+      <div style={{ whiteSpace: 'nowrap', marginTop: '300px' }}>
+        <div style={{ width: '90vw', display: 'inline-block' }} />
+        {/* <NodePositionDemo2 detailsContainer={detailsContainer} /> */}
+        <div style={{ width: '110vw', display: 'inline-block' }} />
+      </div>
+      <div style={{ whiteSpace: 'nowrap', marginTop: '550px', marginBottom: '100vh' }}>
+        <div style={{ width: '110vw', display: 'inline-block' }} />
+        {/* <NodePositionDemo3 detailsContainer={detailsContainer} /> */}
+        <div style={{ width: '150vw', display: 'inline-block' }} />
+      </div>
+    </NodePositionProvider>
+  );
+};
 
 export default AppDemo;

@@ -4,39 +4,50 @@ import PropTypes from 'prop-types';
 import withNodePosition from '../src/withNodePosition';
 import NodeDetails from './NodeDetails';
 
-const backgroundColor = 'lightcoral';
+const backgroundColor = 'violet';
 
-const NodePositionDemo1 = forwardRef((props, ref) => {
+const options = {
+  rootMargin: '100px',
+  trackOutOfFrame: true,
+  intersectionThreshold: [0, 0.25, 0.5, 0.75, 1],
+};
+
+const NodePositionDemo3 = forwardRef((props, ref) => {
   const { nodePosition, detailsContainer } = props;
 
   return (
     <Fragment>
       {detailsContainer.current && createPortal(
         <NodeDetails
-          summary="Node 1"
+          open
+          summary="Node 3"
+          options={options}
           nodePosition={nodePosition}
           color={backgroundColor}
-          open
         />,
         detailsContainer.current,
       )}
       <div
         ref={ref}
         style={{
-          width: '40rem',
-          height: '500px',
+          width: '110vw',
+          height: '110vh',
           backgroundColor,
+          display: 'inline-block',
         }}
       />
     </Fragment>
   );
 });
 
-NodePositionDemo1.propTypes = {
+NodePositionDemo3.propTypes = {
   nodePosition: PropTypes.shape({}).isRequired,
   detailsContainer: PropTypes.shape({
     current: PropTypes.shape({}),
   }).isRequired,
 };
 
-export default withNodePosition(NodePositionDemo1);
+export default withNodePosition(
+  NodePositionDemo3,
+  { ...options },
+);

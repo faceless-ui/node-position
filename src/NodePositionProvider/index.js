@@ -5,16 +5,13 @@ import { ScrollInfoProvider } from '@trbl/react-scroll-info';
 import NodePositionContext from './context';
 
 const NodePositionProvider = (props) => {
-  const {
-    children,
-    frameOffset,
-  } = props;
+  const { children } = props;
 
   return (
     <WindowInfoProvider>
       <ScrollInfoProvider>
-        <NodePositionContext.Provider value={{ frameOffset }}>
-          {children}
+        <NodePositionContext.Provider>
+          {children && children}
         </NodePositionContext.Provider>
       </ScrollInfoProvider>
     </WindowInfoProvider>
@@ -22,12 +19,11 @@ const NodePositionProvider = (props) => {
 };
 
 NodePositionProvider.defaultProps = {
-  frameOffset: 0,
+  children: undefined,
 };
 
 NodePositionProvider.propTypes = {
-  frameOffset: PropTypes.number,
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
 };
 
 export default NodePositionProvider;

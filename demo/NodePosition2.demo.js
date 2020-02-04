@@ -1,139 +1,49 @@
-import React, { forwardRef, Component } from 'react';
+import React, { forwardRef, Component, Fragment } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import withNodePosition from '../src/withNodePosition';
+import NodeDetails from './NodeDetails';
+
+const backgroundColor = 'aquamarine';
 
 class NodePositionDemo2 extends Component {
   render() {
     const {
-      nodePosition: {
-        nodeRect: {
-          width,
-          height,
-          top,
-          right,
-          bottom,
-          left,
-        },
-        totalXOffset,
-        totalYOffset,
-        totalXTrack,
-        totalYTrack,
-        xDistanceToFrame,
-        yDistanceToFrame,
-        xIsInFrame,
-        yIsInFrame,
-        isInFrame,
-        xPercentageInFrame,
-        yPercentageInFrame,
-        totalPercentageInFrame,
-      },
+      nodePosition,
       refToForward,
+      detailsContainer,
     } = this.props;
 
     return (
-      <code
-        ref={refToForward}
-        style={{
-          backgroundColor: 'rgba(0, 0, 0, .15)',
-          display: 'inline-block',
-        }}
-      >
-        <pre>
-          {'nodePosition: {'}
-          <br />
-          &emsp;
-          {'nodeRect: {'}
-          <br />
-          &emsp;&emsp;
-          {`width: ${width},`}
-          <br />
-          &emsp;&emsp;
-          {`height: ${height},`}
-          <br />
-          &emsp;&emsp;
-          {`top: ${top},`}
-          <br />
-          &emsp;&emsp;
-          {`right: ${right},`}
-          <br />
-          &emsp;&emsp;
-          {`bottom: ${bottom},`}
-          <br />
-          &emsp;&emsp;
-          {`left: ${left},`}
-          <br />
-          &emsp;
-          {'},'}
-          <br />
-          &emsp;
-          {`totalXOffset: ${totalXOffset},`}
-          <br />
-          &emsp;
-          {`totalYOffset: ${totalYOffset},`}
-          <br />
-          &emsp;
-          {`totalXTrack: ${totalXTrack},`}
-          <br />
-          &emsp;
-          {`totalYTrack: ${totalYTrack},`}
-          <br />
-          &emsp;
-          {`xDistanceToFrame: ${xDistanceToFrame},`}
-          <br />
-          &emsp;
-          {`yDistanceToFrame: ${yDistanceToFrame},`}
-          <br />
-          &emsp;
-          {`xIsInFrame: ${xIsInFrame},`}
-          <br />
-          &emsp;
-          {`yIsInFrame: ${yIsInFrame},`}
-          <br />
-          &emsp;
-          {`isInFrame: ${isInFrame},`}
-          <br />
-          &emsp;
-          {`xPercentageInFrame: ${xPercentageInFrame},`}
-          <br />
-          &emsp;
-          {`yPercentageInFrame: ${yPercentageInFrame},`}
-          <br />
-          &emsp;
-          {`totalPercentageInFrame: ${totalPercentageInFrame},`}
-          <br />
-          {'}'}
-        </pre>
-      </code>
+      <Fragment>
+        {detailsContainer.current && createPortal(
+          <NodeDetails
+            summary="Node 2"
+            nodePosition={nodePosition}
+            color={backgroundColor}
+          />,
+          detailsContainer.current,
+        )}
+        <div
+          ref={refToForward}
+          style={{
+            width: '75vw',
+            height: '33vh',
+            backgroundColor,
+            display: 'inline-block',
+          }}
+        />
+      </Fragment>
     );
   }
 }
 
-NodePositionDemo2.defaultProps = {};
-
 NodePositionDemo2.propTypes = {
-  nodePosition: PropTypes.shape({
-    nodeRect: PropTypes.shape({
-      width: PropTypes.number,
-      height: PropTypes.number,
-      top: PropTypes.number,
-      right: PropTypes.number,
-      bottom: PropTypes.number,
-      left: PropTypes.number,
-    }),
-    totalXOffset: PropTypes.number,
-    totalYOffset: PropTypes.number,
-    totalXTrack: PropTypes.number,
-    totalYTrack: PropTypes.number,
-    xDistanceToFrame: PropTypes.number,
-    yDistanceToFrame: PropTypes.number,
-    xIsInFrame: PropTypes.bool,
-    yIsInFrame: PropTypes.bool,
-    isInFrame: PropTypes.bool,
-    xPercentageInFrame: PropTypes.number,
-    yPercentageInFrame: PropTypes.number,
-    totalPercentageInFrame: PropTypes.number,
-  }).isRequired,
+  nodePosition: PropTypes.shape({}).isRequired,
   refToForward: PropTypes.shape({}).isRequired,
+  detailsContainer: PropTypes.shape({
+    current: PropTypes.shape({}),
+  }).isRequired,
 };
 
 export default withNodePosition(
