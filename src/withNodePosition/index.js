@@ -83,15 +83,12 @@ const withNodePosition = (PassedComponent, options) => {
       if (windowEventFired) this.queryNodePosition();
 
       if (scrollEventFired) {
-        // Respond to scroll event...
+        // Respond to the scroll event...
         // if the browser supports the IntersectionObserver API,
         // or if the passed options have opted-in to node tracking while outside the frame,
         // or if the node is currently intersecting its frame.
         if (!intersectionObserverIsSupported || this.options.trackOutOfFrame || isIntersecting) this.handleScrollEvent();
-        // Otherwise, prune the stale node positions...
-        // if the browser has no support for the IntersectionObserver API,
-        // and if the passed options have opted-out of node tracking while outside the frame,
-        // and if the node is
+        // Otherwise, prune the stale node positions.
         else if (intersectionObserverIsSupported && !this.options.trackOutOfFrame && !isIntersecting) this.resetState();
       }
     }
@@ -103,6 +100,7 @@ const withNodePosition = (PassedComponent, options) => {
 
     handleScrollEvent = () => {
       const { scrollInfo } = this.props;
+
       // The getBoundingClientRect received on mount in Chrome is calculated relative to the cached scroll position (if present),
       // so tracking against it before the first scroll event would lead to de-synchronization unless queryNodePosition
       // is run on the first scroll event, which allows for accurate, safe tracking on all subsequent events.
@@ -111,7 +109,8 @@ const withNodePosition = (PassedComponent, options) => {
     }
 
     // true position
-    handleIntersectionEvent = (entries) => { // executed on the main thread
+    handleIntersectionEvent = (entries) => {
+      console.log('intersect');
       const {
         rootBounds: frameRect,
         boundingClientRect: nodeRect,
@@ -128,11 +127,13 @@ const withNodePosition = (PassedComponent, options) => {
 
     // true position
     queryNodePosition = () => {
+      console.log('query');
       const { windowInfo } = this.props;
       const { current: node } = this.nodeRef;
 
       if (node) {
-        const frameOffset = 0;
+        const frameOffset = 0; // TODO: parse the rootMargin option property instead
+
         const frameRect = {
           width: windowInfo.width - (frameOffset * 2),
           height: windowInfo.height - (frameOffset * 2),
@@ -142,7 +143,7 @@ const withNodePosition = (PassedComponent, options) => {
           left: frameOffset,
         };
 
-        const nodeRect = node.getBoundingClientRect(); // clientRect, relative to the viewport
+        const nodeRect = node.getBoundingClientRect(); // relative to the viewport
 
         this.setState({
           frameRect,
@@ -156,6 +157,7 @@ const withNodePosition = (PassedComponent, options) => {
 
     // synthetic (calculated) position
     trackNodePosition = () => {
+      console.log('track');
       const { scrollInfo } = this.props;
       const { nodeRect, frameRect } = this.state;
 
@@ -182,43 +184,44 @@ const withNodePosition = (PassedComponent, options) => {
       const isContainedInPlaneX = nodeRect.right > frameRect.left && nodeRect.right < frameRect.right;
       const isContainedInPlaneY = nodeRect.bottom > frameRect.top && nodeRect.bottom < frameRect.bottom;
 
-      // TODO: Revisit this width calculation to improve concision and semantics
-      let intersectionWidth = 0;
-      if (isContainedInPlaneX) {
-        if (nodeRect.left >= frameRect.left) intersectionWidth = nodeRect.right - nodeRect.left;
-        else intersectionWidth = nodeRect.right;
+      const intersectionRect = {
+        width: 0,
+        height: 0,
+        // top: 0, TODO: support this property
+        // right: 0, TODO: support this property
+        // bottom: 0, TODO: support this property
+        // left: 0, TODO: support this property
+      };
+
+      if (isContainedInPlaneX) { // TODO: simplify this logic or make it more readable
+        if (nodeRect.left >= frameRect.left) intersectionRect.width = nodeRect.right - nodeRect.left;
+        else intersectionRect.width = nodeRect.right;
       } else if (nodeRect.right > frameRect.right && nodeRect.left < frameRect.right) {
-        if (nodeRect.left <= frameRect.right) intersectionWidth = frameRect.right - nodeRect.left;
-        else intersectionWidth = frameRect.right;
+        if (nodeRect.left <= frameRect.right) intersectionRect.width = frameRect.right - nodeRect.left;
+        else intersectionRect.width = frameRect.right;
       }
 
-      // TODO: Revisit this height calculation to improve concision and semantics
-      let intersectionHeight = 0;
-      if (isContainedInPlaneY) {
-        if (nodeRect.top >= frameRect.top) intersectionHeight = nodeRect.bottom - nodeRect.top;
-        else intersectionHeight = nodeRect.bottom;
+      if (isContainedInPlaneY) { // TODO: simplify this logic or make it more readable
+        if (nodeRect.top >= frameRect.top) intersectionRect.height = nodeRect.bottom - nodeRect.top;
+        else intersectionRect.height = nodeRect.bottom;
       } else if (nodeRect.bottom > frameRect.bottom && nodeRect.top < frameRect.bottom) {
-        if (nodeRect.top <= frameRect.bottom) intersectionHeight = frameRect.bottom - nodeRect.top;
-        else intersectionHeight = frameRect.bottom;
+        if (nodeRect.top <= frameRect.bottom) intersectionRect.height = frameRect.bottom - nodeRect.top;
+        else intersectionRect.height = frameRect.bottom;
       }
 
-      const isIntersectingPlaneX = intersectionWidth > 0;
-      const isIntersectingPlaneY = intersectionHeight > 0;
+      const isIntersectingPlaneX = intersectionRect.width > 0;
+      const isIntersectingPlaneY = intersectionRect.height > 0;
       const isIntersectingBothPlanes = isIntersectingPlaneX && isIntersectingPlaneY;
 
-      const xPlaneIntersectionRatio = intersectionWidth / nodeRect.width;
-      const yPlaneIntersectionRatio = intersectionHeight / nodeRect.height;
+      const xPlaneIntersectionRatio = intersectionRect.width / nodeRect.width || 0; // fallback to 0 for cases where 0/0 === NaN
+      const yPlaneIntersectionRatio = intersectionRect.height / nodeRect.height || 0; // fallback to 0 for cases where 0/0 === NaN
 
       const xIntersectionRatio = isIntersectingBothPlanes ? xPlaneIntersectionRatio : 0;
       const yIntersectionRatio = isIntersectingBothPlanes ? yPlaneIntersectionRatio : 0;
       const intersectionRatio = (xIntersectionRatio + yIntersectionRatio) / 2;
 
       return {
-        // TODO: Add top, right, bottom, and left to intersectionRect object
-        intersectionRect: {
-          width: intersectionWidth,
-          height: intersectionHeight,
-        },
+        intersectionRect,
         isIntersectingPlaneX,
         isIntersectingPlaneY,
         isIntersecting: isIntersectingBothPlanes,
@@ -294,8 +297,8 @@ const withNodePosition = (PassedComponent, options) => {
       {(nodePositionContext) => (
         <Node
           {...{
-            ...nodePositionContext,
             ...props,
+            ...nodePositionContext,
           }}
         />
       )}
