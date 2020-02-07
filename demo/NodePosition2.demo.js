@@ -28,7 +28,7 @@ class NodePositionDemo2 extends Component {
         <div
           ref={refToForward}
           style={{
-            width: '75vw',
+            width: '110vw',
             height: '33vh',
             backgroundColor,
             display: 'inline-block',

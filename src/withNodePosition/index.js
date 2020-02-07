@@ -35,20 +35,28 @@ const withNodePosition = (PassedComponent, options) => {
           width: 0,
           height: 0,
         },
-        isIntersectingPlaneX: false,
-        isIntersectingPlaneY: false,
-        isIntersecting: false,
-        intersectionRatio: 0,
-        xIntersectionRatio: 0,
-        yIntersectionRatio: 0,
-        xPlaneIntersectionRatio: 0,
-        yPlaneIntersectionRatio: 0,
-        xDisplacementRatio: 0,
-        yDisplacementRatio: 0,
-        displacementRatio: 0,
+        isVisible: false,
+        xVisibility: 0,
+        yVisibility: 0,
+        visibility: 0,
+        xPlaneVisibility: 0,
+        yPlaneVisibility: 0,
+        isVisibleInPlaneX: false,
+        isVisibleInPlaneY: false,
+        xDisplacement: 0,
+        yDisplacement: 0,
+        displacement: 0,
       };
 
       this.state = {
+        clippingMask: {
+          width: 0,
+          height: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+        },
         ...this.initialState,
         totalOffsetLeft: 0,
         totalOffsetTop: 0,
@@ -76,7 +84,7 @@ const withNodePosition = (PassedComponent, options) => {
 
     componentDidUpdate(prevProps) {
       const { scrollInfo, windowInfo } = this.props;
-      const { isIntersecting, intersectionObserverIsSupported } = this.state;
+      const { isVisible, intersectionObserverIsSupported } = this.state;
       const windowEventFired = windowInfo.eventsFired !== prevProps.windowInfo.eventsFired;
       const scrollEventFired = scrollInfo.eventsFired !== prevProps.scrollInfo.eventsFired;
 
@@ -87,9 +95,9 @@ const withNodePosition = (PassedComponent, options) => {
         // if the browser supports the IntersectionObserver API,
         // or if the passed options have opted-in to node tracking while outside the frame,
         // or if the node is currently intersecting its frame.
-        if (!intersectionObserverIsSupported || this.options.trackOutOfFrame || isIntersecting) this.handleScrollEvent();
+        if (!intersectionObserverIsSupported || this.options.trackOutOfFrame || isVisible) this.handleScrollEvent();
         // Otherwise, prune the stale node positions.
-        else if (intersectionObserverIsSupported && !this.options.trackOutOfFrame && !isIntersecting) this.resetState();
+        else if (intersectionObserverIsSupported && !this.options.trackOutOfFrame && !isVisible) this.resetState();
       }
     }
 
@@ -110,31 +118,30 @@ const withNodePosition = (PassedComponent, options) => {
 
     // true position
     handleIntersectionEvent = (entries) => {
-      console.log('intersect');
       const {
-        rootBounds: frameRect,
+        rootBounds: clippingMask,
         boundingClientRect: nodeRect,
+        isIntersecting: isVisible,
       } = entries[0];
 
       this.setState({
-        frameRect,
+        clippingMask,
         nodeRect,
-        ...this.getIntersectionInfo(frameRect, nodeRect),
-        ...this.getDisplacementInfo(frameRect, nodeRect),
-        ...this.getTotalNodeOffsets(nodeRect),
+        ...this.calculateIntersection(clippingMask, nodeRect, isVisible),
+        ...this.calculateDisplacement(clippingMask, nodeRect),
+        ...this.calculateTotalNodeOffsets(nodeRect),
       });
     }
 
     // true position
     queryNodePosition = () => {
-      console.log('query');
       const { windowInfo } = this.props;
       const { current: node } = this.nodeRef;
 
       if (node) {
         const frameOffset = 0; // TODO: parse the rootMargin option property instead
 
-        const frameRect = {
+        const clippingMask = {
           width: windowInfo.width - (frameOffset * 2),
           height: windowInfo.height - (frameOffset * 2),
           top: frameOffset,
@@ -146,20 +153,19 @@ const withNodePosition = (PassedComponent, options) => {
         const nodeRect = node.getBoundingClientRect(); // relative to the viewport
 
         this.setState({
-          frameRect,
+          clippingMask,
           nodeRect,
-          ...this.getIntersectionInfo(frameRect, nodeRect),
-          ...this.getDisplacementInfo(frameRect, nodeRect),
-          ...this.getTotalNodeOffsets(nodeRect),
+          ...this.calculateIntersection(clippingMask, nodeRect),
+          ...this.calculateDisplacement(clippingMask, nodeRect),
+          ...this.calculateTotalNodeOffsets(nodeRect),
         });
       }
     }
 
     // synthetic (calculated) position
     trackNodePosition = () => {
-      console.log('track');
       const { scrollInfo } = this.props;
-      const { nodeRect, frameRect } = this.state;
+      const { nodeRect, clippingMask } = this.state;
 
       const trackedNodeRect = {
         // TODO: consider adjusting the newNodeRect to account for potential changes in the node dimensions.
@@ -175,83 +181,89 @@ const withNodePosition = (PassedComponent, options) => {
 
       this.setState({
         nodeRect: trackedNodeRect,
-        ...this.getIntersectionInfo(frameRect, nodeRect),
-        ...this.getDisplacementInfo(frameRect, nodeRect),
+        ...this.calculateIntersection(clippingMask, nodeRect),
+        ...this.calculateDisplacement(clippingMask, nodeRect),
       });
     }
 
-    getIntersectionInfo = (frameRect, nodeRect) => {
-      const isContainedInPlaneX = nodeRect.right > frameRect.left && nodeRect.right < frameRect.right;
-      const isContainedInPlaneY = nodeRect.bottom > frameRect.top && nodeRect.bottom < frameRect.bottom;
+    calculateIntersection = (clippingMask, nodeRect, incomingVisibilityStatus) => {
+      const planeIntersectionRect = { width: 0, height: 0 };
 
-      const intersectionRect = {
-        width: 0,
-        height: 0,
-        // top: 0, TODO: support this property
-        // right: 0, TODO: support this property
-        // bottom: 0, TODO: support this property
-        // left: 0, TODO: support this property
-      };
+      const nodeSideIsInPlaneY = (rectSide) => rectSide >= clippingMask.left && rectSide <= clippingMask.right;
+      const nodeIsContainedInPlaneY = nodeSideIsInPlaneY(nodeRect.right) && nodeSideIsInPlaneY(nodeRect.left);
+      const nodeSpansPlaneY = nodeRect.left < clippingMask.left && nodeRect.right > clippingMask.right;
+      const nodeStraddlesFrameLeft = nodeSideIsInPlaneY(nodeRect.right) && nodeRect.left <= clippingMask.left;
+      const nodeStraddlesFrameRight = nodeSideIsInPlaneY(nodeRect.left) && nodeRect.right >= clippingMask.right;
 
-      if (isContainedInPlaneX) { // TODO: simplify this logic or make it more readable
-        if (nodeRect.left >= frameRect.left) intersectionRect.width = nodeRect.right - nodeRect.left;
-        else intersectionRect.width = nodeRect.right;
-      } else if (nodeRect.right > frameRect.right && nodeRect.left < frameRect.right) {
-        if (nodeRect.left <= frameRect.right) intersectionRect.width = frameRect.right - nodeRect.left;
-        else intersectionRect.width = frameRect.right;
-      }
+      if (nodeIsContainedInPlaneY) planeIntersectionRect.width = nodeRect.width;
+      if (nodeStraddlesFrameLeft) planeIntersectionRect.width = nodeRect.right;
+      if (nodeStraddlesFrameRight) planeIntersectionRect.width = clippingMask.right - nodeRect.left;
+      if (nodeSpansPlaneY) planeIntersectionRect.width = clippingMask.width;
 
-      if (isContainedInPlaneY) { // TODO: simplify this logic or make it more readable
-        if (nodeRect.top >= frameRect.top) intersectionRect.height = nodeRect.bottom - nodeRect.top;
-        else intersectionRect.height = nodeRect.bottom;
-      } else if (nodeRect.bottom > frameRect.bottom && nodeRect.top < frameRect.bottom) {
-        if (nodeRect.top <= frameRect.bottom) intersectionRect.height = frameRect.bottom - nodeRect.top;
-        else intersectionRect.height = frameRect.bottom;
-      }
+      const nodeSideIsInPlaneX = (rectSide) => rectSide >= clippingMask.top && rectSide <= clippingMask.bottom;
+      const nodeIsContainedInPlaneX = nodeSideIsInPlaneX(nodeRect.top) && nodeSideIsInPlaneX(nodeRect.bottom);
+      const nodeSpansPlaneX = nodeRect.top < clippingMask.top && nodeRect.bottom > clippingMask.bottom;
+      const nodeStraddlesFrameTop = nodeSideIsInPlaneX(nodeRect.bottom) && nodeRect.top <= clippingMask.top;
+      const nodeStraddlesFrameBottom = nodeSideIsInPlaneX(nodeRect.top) && nodeRect.bottom >= clippingMask.bottom;
 
-      const isIntersectingPlaneX = intersectionRect.width > 0;
-      const isIntersectingPlaneY = intersectionRect.height > 0;
-      const isIntersectingBothPlanes = isIntersectingPlaneX && isIntersectingPlaneY;
+      if (nodeIsContainedInPlaneX) planeIntersectionRect.height = nodeRect.height;
+      if (nodeStraddlesFrameTop) planeIntersectionRect.height = nodeRect.bottom;
+      if (nodeStraddlesFrameBottom) planeIntersectionRect.height = clippingMask.height - nodeRect.top;
+      if (nodeSpansPlaneX) planeIntersectionRect.height = clippingMask.height;
 
-      const xPlaneIntersectionRatio = intersectionRect.width / nodeRect.width || 0; // fallback to 0 for cases where 0/0 === NaN
-      const yPlaneIntersectionRatio = intersectionRect.height / nodeRect.height || 0; // fallback to 0 for cases where 0/0 === NaN
+      const xPlaneVisibility = planeIntersectionRect.height / nodeRect.height || 0;
+      const yPlaneVisibility = planeIntersectionRect.width / nodeRect.width || 0;
 
-      const xIntersectionRatio = isIntersectingBothPlanes ? xPlaneIntersectionRatio : 0;
-      const yIntersectionRatio = isIntersectingBothPlanes ? yPlaneIntersectionRatio : 0;
-      const intersectionRatio = (xIntersectionRatio + yIntersectionRatio) / 2;
+      const isVisibleInPlaneX = xPlaneVisibility >= 0;
+      const isVisibleInPlaneY = yPlaneVisibility >= 0;
+
+      // The incomingVisibilityStatus argument is needed here to account for when the Intersection Observer
+      // triggers this method with either isVisibleInPlaneX or isVisibleInPlaneY of zero, leading the isVisible state to become false
+      // and ultimately fail the conditions within componentDidUpdate that allow the scroll event to take over.
+      // This approach creates two sources of truth for the isVisible state, so there may be room for improvement here (isIdle?).
+      const isVisible = incomingVisibilityStatus !== undefined
+        ? incomingVisibilityStatus
+        : isVisibleInPlaneX && isVisibleInPlaneY;
+
+      const xVisibility = isVisible ? xPlaneVisibility : 0;
+      const yVisibility = isVisible ? yPlaneVisibility : 0;
+      const visibility = isVisible ? (xVisibility + yVisibility) / 2 : 0;
 
       return {
-        intersectionRect,
-        isIntersectingPlaneX,
-        isIntersectingPlaneY,
-        isIntersecting: isIntersectingBothPlanes,
-        intersectionRatio,
-        xIntersectionRatio,
-        yIntersectionRatio,
-        xPlaneIntersectionRatio,
-        yPlaneIntersectionRatio,
+        intersectionRect: {
+          width: isVisible ? planeIntersectionRect.width : 0,
+          height: isVisible ? planeIntersectionRect.height : 0,
+        },
+        isVisible,
+        xVisibility,
+        yVisibility,
+        visibility,
+        xPlaneVisibility,
+        yPlaneVisibility,
+        isVisibleInPlaneX,
+        isVisibleInPlaneY,
       };
     }
 
-    getDisplacementInfo = (frameRect, nodeRect) => {
-      const xTrackLength = frameRect.width + nodeRect.width;
-      const xDistanceToTravel = nodeRect.right - frameRect.left;
-      const xDisplacementRatio = (xDistanceToTravel / xTrackLength) || 0; // conditional assignment for cases where 0 / 0 === NaN
+    calculateDisplacement = (clippingMask, nodeRect) => {
+      const xTrackLength = clippingMask.width + nodeRect.width;
+      const xDisplacedPixels = nodeRect.right - clippingMask.left;
+      const xDisplacement = (xDisplacedPixels / xTrackLength) || 0;
 
-      const yTrackLength = frameRect.height + nodeRect.height;
-      const yDistanceToTravel = nodeRect.bottom - frameRect.top;
-      const yDisplacementRatio = (yDistanceToTravel / yTrackLength) || 0; // conditional assignment for cases where 0 / 0 === NaN
+      const yTrackLength = clippingMask.height + nodeRect.height;
+      const yDisplacedPixels = nodeRect.bottom - clippingMask.top;
+      const yDisplacement = (yDisplacedPixels / yTrackLength) || 0;
 
-      const displacementRatio = (xDisplacementRatio + yDisplacementRatio) / 2;
+      const displacement = (xDisplacement + yDisplacement) / 2;
 
       return {
-        xDisplacementRatio,
-        yDisplacementRatio,
-        displacementRatio,
+        xDisplacement,
+        yDisplacement,
+        displacement,
       };
     }
 
-    getTotalNodeOffsets = (nodeRect) => {
+    calculateTotalNodeOffsets = (nodeRect) => {
       const { scrollInfo } = this.props;
       return {
         totalOffsetLeft: scrollInfo.x + nodeRect.left,

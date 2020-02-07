@@ -4,29 +4,20 @@ import PropTypes from 'prop-types';
 const NodeDetails = (props) => {
   const {
     nodePosition: {
-      nodeRect: {
-        width,
-        height,
-        top,
-        right,
-        bottom,
-        left,
-      },
-      intersectionRect: {
-        width: intersectionWidth,
-        height: intersectionHeight,
-      },
-      isIntersectingPlaneX,
-      isIntersectingPlaneY,
-      isIntersecting,
-      intersectionRatio,
-      xIntersectionRatio,
-      yIntersectionRatio,
-      xPlaneIntersectionRatio,
-      yPlaneIntersectionRatio,
-      displacementRatio,
-      xDisplacementRatio,
-      yDisplacementRatio,
+      clippingMask,
+      nodeRect,
+      intersectionRect,
+      isVisible,
+      xVisibility,
+      yVisibility,
+      visibility,
+      xPlaneVisibility,
+      yPlaneVisibility,
+      isVisibleInPlaneX,
+      isVisibleInPlaneY,
+      xDisplacement,
+      yDisplacement,
+      displacement,
       totalOffsetLeft,
       totalOffsetTop,
     },
@@ -61,25 +52,49 @@ const NodeDetails = (props) => {
         {'nodePosition: {'}
         <br />
         &emsp;
+        {'clippingMask: {'}
+        <br />
+        &emsp;&emsp;
+        {`width: ${clippingMask.width},`}
+        <br />
+        &emsp;&emsp;
+        {`height: ${clippingMask.height},`}
+        <br />
+        &emsp;&emsp;
+        {`top: ${clippingMask.top},`}
+        <br />
+        &emsp;&emsp;
+        {`right: ${clippingMask.right},`}
+        <br />
+        &emsp;&emsp;
+        {`bottom: ${clippingMask.bottom},`}
+        <br />
+        &emsp;&emsp;
+        {`left: ${clippingMask.left},`}
+        <br />
+        &emsp;
+        {'},'}
+        <br />
+        &emsp;
         {'nodeRect: {'}
         <br />
         &emsp;&emsp;
-        {`width: ${width},`}
+        {`width: ${nodeRect.width},`}
         <br />
         &emsp;&emsp;
-        {`height: ${height},`}
+        {`height: ${nodeRect.height},`}
         <br />
         &emsp;&emsp;
-        {`top: ${top},`}
+        {`top: ${nodeRect.top},`}
         <br />
         &emsp;&emsp;
-        {`right: ${right},`}
+        {`right: ${nodeRect.right},`}
         <br />
         &emsp;&emsp;
-        {`bottom: ${bottom},`}
+        {`bottom: ${nodeRect.bottom},`}
         <br />
         &emsp;&emsp;
-        {`left: ${left},`}
+        {`left: ${nodeRect.left},`}
         <br />
         &emsp;
         {'},'}
@@ -88,46 +103,46 @@ const NodeDetails = (props) => {
         {'intersectionRect: {'}
         <br />
         &emsp;&emsp;
-        {`width: ${intersectionWidth},`}
+        {`width: ${intersectionRect.width},`}
         <br />
         &emsp;&emsp;
-        {`height: ${intersectionHeight},`}
+        {`height: ${intersectionRect.height},`}
         <br />
         &emsp;
         {'},'}
         <br />
         &emsp;
-        {`isIntersectingPlaneX: ${isIntersectingPlaneX},`}
+        {`isVisible: ${isVisible},`}
         <br />
         &emsp;
-        {`isIntersectingPlaneY: ${isIntersectingPlaneY},`}
+        {`xVisibility: ${xVisibility},`}
         <br />
         &emsp;
-        {`isIntersecting: ${isIntersecting},`}
+        {`yVisibility: ${yVisibility},`}
         <br />
         &emsp;
-        {`intersectionRatio: ${intersectionRatio},`}
+        {`visibility: ${visibility},`}
         <br />
         &emsp;
-        {`xIntersectionRatio: ${xIntersectionRatio},`}
+        {`xPlaneVisibility: ${xPlaneVisibility},`}
         <br />
         &emsp;
-        {`yIntersectionRatio: ${yIntersectionRatio},`}
+        {`yPlaneVisibility: ${yPlaneVisibility},`}
         <br />
         &emsp;
-        {`xPlaneIntersectionRatio: ${xPlaneIntersectionRatio},`}
+        {`isVisibleInPlaneX: ${isVisibleInPlaneX},`}
         <br />
         &emsp;
-        {`yPlaneIntersectionRatio: ${yPlaneIntersectionRatio},`}
+        {`isVisibleInPlaneY: ${isVisibleInPlaneY},`}
         <br />
         &emsp;
-        {`displacementRatio: ${displacementRatio},`}
+        {`xDisplacement: ${xDisplacement},`}
         <br />
         &emsp;
-        {`xDisplacementRatio: ${xDisplacementRatio},`}
+        {`yDisplacement: ${yDisplacement},`}
         <br />
         &emsp;
-        {`yDisplacementRatio: ${yDisplacementRatio},`}
+        {`displacement: ${displacement},`}
         <br />
         &emsp;
         {`totalOffsetLeft: ${totalOffsetLeft},`}
@@ -150,6 +165,14 @@ NodeDetails.defaultProps = {
 
 NodeDetails.propTypes = {
   nodePosition: PropTypes.shape({
+    clippingMask: PropTypes.shape({
+      width: PropTypes.number,
+      height: PropTypes.number,
+      top: PropTypes.number,
+      right: PropTypes.number,
+      bottom: PropTypes.number,
+      left: PropTypes.number,
+    }),
     nodeRect: PropTypes.shape({
       width: PropTypes.number,
       height: PropTypes.number,
@@ -162,17 +185,17 @@ NodeDetails.propTypes = {
       width: PropTypes.number,
       height: PropTypes.number,
     }),
-    isIntersectingPlaneX: PropTypes.bool,
-    isIntersectingPlaneY: PropTypes.bool,
-    isIntersecting: PropTypes.bool,
-    intersectionRatio: PropTypes.number,
-    xIntersectionRatio: PropTypes.number,
-    yIntersectionRatio: PropTypes.number,
-    displacementRatio: PropTypes.number,
-    xPlaneIntersectionRatio: PropTypes.number,
-    yPlaneIntersectionRatio: PropTypes.number,
-    xDisplacementRatio: PropTypes.number,
-    yDisplacementRatio: PropTypes.number,
+    isVisible: PropTypes.bool,
+    xVisibility: PropTypes.number,
+    yVisibility: PropTypes.number,
+    visibility: PropTypes.number,
+    xPlaneVisibility: PropTypes.number,
+    yPlaneVisibility: PropTypes.number,
+    isVisibleInPlaneX: PropTypes.bool,
+    isVisibleInPlaneY: PropTypes.bool,
+    xDisplacement: PropTypes.number,
+    yDisplacement: PropTypes.number,
+    displacement: PropTypes.number,
     totalOffsetLeft: PropTypes.number,
     totalOffsetTop: PropTypes.number,
   }).isRequired,
