@@ -4,6 +4,10 @@ import PropTypes from 'prop-types';
 import withNodePosition from '../src/withNodePosition';
 import NodeDetails from './NodeDetails';
 
+const options = {
+  reportScrollEvents: 'whenVisible',
+};
+
 const backgroundColor = 'lightcoral';
 
 const NodePositionDemo1 = forwardRef((props, ref) => {
@@ -13,9 +17,12 @@ const NodePositionDemo1 = forwardRef((props, ref) => {
     <Fragment>
       {detailsContainer.current && createPortal(
         <NodeDetails
-          summary="Node 1"
-          nodePosition={nodePosition}
-          color={backgroundColor}
+          {...{
+            summary: 'Node 1',
+            color: backgroundColor,
+            options,
+            nodePosition,
+          }}
           open
         />,
         detailsContainer.current,
@@ -26,6 +33,7 @@ const NodePositionDemo1 = forwardRef((props, ref) => {
           width: '40rem',
           height: '500px',
           backgroundColor,
+          flexShrink: '0',
         }}
       />
     </Fragment>
@@ -39,4 +47,7 @@ NodePositionDemo1.propTypes = {
   }).isRequired,
 };
 
-export default withNodePosition(NodePositionDemo1, { trackOutOfFrame: true });
+export default withNodePosition(
+  NodePositionDemo1,
+  options,
+);

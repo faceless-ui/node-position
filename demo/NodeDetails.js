@@ -38,7 +38,7 @@ const NodeDetails = (props) => {
         {'options: {'}
         <br />
         &emsp;
-        {`trackOutOfFrame: ${options.trackOutOfFrame},`}
+        {`reportScrollEvents: ${options.reportScrollEvents},`}
         <br />
         &emsp;
         {`rootMargin: ${options.rootMargin},`}
@@ -202,7 +202,7 @@ NodeDetails.propTypes = {
   open: PropTypes.bool,
   summary: PropTypes.string,
   options: PropTypes.shape({
-    trackOutOfFrame: PropTypes.bool,
+    reportScrollEvents: PropTypes.string,
     rootMargin: PropTypes.string,
     intersectionThreshold: PropTypes.array,
   }),

@@ -2,10 +2,14 @@ import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import NodePositionContext from '../NodePositionProvider/context';
 
-const defaultOptions = {
+const defaultOptions = { // TODO: Type-check this options object
   root: null,
   rootMargin: '0px',
-  trackOutOfFrame: false,
+  // This option is only recognized within browsers that support the IntersectionObserver API.
+  // Since it is merely a performance boost, its absence will not cause breakage or require an implementation change.
+  reportScrollEvents: 'never',
+  // This option is only recognized when "reportScrollEvents" is not equal to "always" or "whenVisible",
+  // since these two options report the node position parallel to intersection events.
   intersectionThreshold: 0,
 };
 
@@ -70,10 +74,17 @@ const withNodePosition = (PassedComponent, options) => {
         && 'intersectionRatio' in window.IntersectionObserverEntry.prototype;
 
       if (intersectionObserverIsSupported) {
+        const {
+          root,
+          rootMargin,
+          intersectionThreshold,
+          reportScrollEvents,
+        } = this.options;
+
         this.observer = new IntersectionObserver(this.handleIntersectionEvent, {
-          root: this.options.root,
-          rootMargin: this.options.rootMargin,
-          threshold: this.options.intersectionThreshold,
+          root,
+          rootMargin,
+          threshold: reportScrollEvents !== 'always' || reportScrollEvents !== 'whenVisible' ? intersectionThreshold : 0,
         });
 
         this.observer.observe(this.nodeRef.current);
@@ -83,21 +94,22 @@ const withNodePosition = (PassedComponent, options) => {
     }
 
     componentDidUpdate(prevProps) {
+      const { reportScrollEvents } = this.options;
       const { scrollInfo, windowInfo } = this.props;
       const { isVisible, intersectionObserverIsSupported } = this.state;
-      const windowEventFired = windowInfo.eventsFired !== prevProps.windowInfo.eventsFired;
-      const scrollEventFired = scrollInfo.eventsFired !== prevProps.scrollInfo.eventsFired;
 
-      if (windowEventFired) this.queryNodePosition();
+      const scrollEventHasFired = prevProps.scrollInfo.eventsFired !== scrollInfo.eventsFired;
+      const windowEventHasFired = prevProps.windowInfo.eventsFired !== windowInfo.eventsFired;
 
-      if (scrollEventFired) {
-        // Respond to the scroll event...
-        // if the browser supports the IntersectionObserver API,
-        // or if the passed options have opted-in to node tracking while outside the frame,
-        // or if the node is currently intersecting its frame.
-        if (!intersectionObserverIsSupported || this.options.trackOutOfFrame || isVisible) this.handleScrollEvent();
-        // Otherwise, prune the stale node positions.
-        else if (intersectionObserverIsSupported && !this.options.trackOutOfFrame && !isVisible) this.resetState();
+      if (windowEventHasFired) this.queryNodePosition();
+
+      if (scrollEventHasFired) {
+        if (
+          !intersectionObserverIsSupported
+          || reportScrollEvents === 'always'
+          || (!isVisible && reportScrollEvents === 'whenInvisible')
+          || (isVisible && reportScrollEvents === 'whenVisible')
+        ) this.handleScrollEvent();
       }
     }
 
@@ -214,8 +226,8 @@ const withNodePosition = (PassedComponent, options) => {
       const xPlaneVisibility = planeIntersectionRect.height / nodeRect.height || 0;
       const yPlaneVisibility = planeIntersectionRect.width / nodeRect.width || 0;
 
-      const isVisibleInPlaneX = xPlaneVisibility >= 0;
-      const isVisibleInPlaneY = yPlaneVisibility >= 0;
+      const isVisibleInPlaneX = xPlaneVisibility > 0;
+      const isVisibleInPlaneY = yPlaneVisibility > 0;
 
       // The incomingVisibilityStatus argument is needed here to account for when the Intersection Observer
       // triggers this method with either isVisibleInPlaneX or isVisibleInPlaneY of zero, leading the isVisible state to become false
@@ -271,19 +283,32 @@ const withNodePosition = (PassedComponent, options) => {
       };
     }
 
-    resetState = () => {
-      this.setState({ ...this.initialState });
+    pruneStale = () => {
+      const { isReset } = this.state;
+
+      if (!isReset) {
+        this.setState({
+          ...this.initialState,
+          isReset: true,
+        });
+      }
     }
 
     render() {
+      const passedProps = { ...this.props };
+      delete passedProps.scrollInfo;
+      delete passedProps.windowInfo;
+
       const passedState = { ...this.state };
       delete passedState.intersectionObserverIsSupported;
 
       return (
         <PassedComponent
           ref={this.nodeRef}
-          nodePosition={{ ...passedState }}
-          {...this.props}
+          {...{
+            nodePosition: { ...passedState },
+            ...passedProps,
+          }}
         />
       );
     }
