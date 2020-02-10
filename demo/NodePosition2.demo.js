@@ -4,6 +4,10 @@ import PropTypes from 'prop-types';
 import withNodePosition from '../src/withNodePosition';
 import NodeDetails from './NodeDetails';
 
+const options = {
+  reportScrollEvents: 'always',
+};
+
 const backgroundColor = 'aquamarine';
 
 class NodePositionDemo2 extends Component {
@@ -18,10 +22,12 @@ class NodePositionDemo2 extends Component {
       <Fragment>
         {detailsContainer.current && createPortal(
           <NodeDetails
-            summary="Node 2"
-            nodePosition={nodePosition}
-            color={backgroundColor}
-            open
+            {...{
+              summary: 'Node 2',
+              color: backgroundColor,
+              options,
+              nodePosition,
+            }}
           />,
           detailsContainer.current,
         )}
@@ -54,4 +60,11 @@ export default withNodePosition(
       refToForward={ref}
     />
   )),
+  options,
 );
+
+// shouldComponentUpdate(nextProps) {
+//   const nodePositionDidNotChange = isEqual(this.props.nodePosition, nextProps.nodePosition);
+//   return !nodePositionDidNotChange;
+//   { reportScrollEvents: 'never' },
+// }
