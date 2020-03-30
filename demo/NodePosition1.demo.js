@@ -34,17 +34,23 @@ const NodePositionDemo1 = forwardRef((props, ref) => {
           height: '500px',
           backgroundColor,
           flexShrink: '0',
+          ...props.style,
         }}
       />
     </Fragment>
   );
 });
 
+NodePositionDemo1.defaultProps = {
+  style: {},
+};
+
 NodePositionDemo1.propTypes = {
   nodePosition: PropTypes.shape({}).isRequired,
   detailsContainer: PropTypes.shape({
     current: PropTypes.shape({}),
   }).isRequired,
+  style: PropTypes.shape({}),
 };
 
 export default withNodePosition(

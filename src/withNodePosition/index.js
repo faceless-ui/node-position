@@ -1,5 +1,6 @@
 import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
+import ResizeObserver from 'resize-observer-polyfill';
 import NodePositionContext from '../NodePositionProvider/context';
 
 const defaultOptions = { // TODO: Type-check this options object
@@ -19,7 +20,14 @@ const withNodePosition = (PassedComponent, options) => {
       super();
 
       this.nodeRef = createRef();
-      this.observer = null;
+
+      this.canUseResizeObserver = false;
+      this.resizeObserver = null;
+      this.resizeObserverIsInitialized = false;
+
+      this.canUseIntersectionObserver = false;
+      this.intersectionObserver = null;
+      this.intersectionObserverIsInitialized = false;
 
       this.options = {
         ...defaultOptions,
@@ -64,141 +72,155 @@ const withNodePosition = (PassedComponent, options) => {
         ...this.initialState,
         totalOffsetLeft: 0,
         totalOffsetTop: 0,
-        intersectionObserverIsSupported: false,
       };
     }
 
     componentDidMount() {
-      const intersectionObserverIsSupported = 'IntersectionObserver' in window
+      console.warn('mount');
+      this.canUseResizeObserver = 'ResizeObserver' in window;
+      this.canUseIntersectionObserver = 'IntersectionObserver' in window
         && 'IntersectionObserverEntry' in window
         && 'intersectionRatio' in window.IntersectionObserverEntry.prototype;
 
-      if (intersectionObserverIsSupported) {
-        const {
-          root,
-          rootMargin,
-          intersectionThreshold,
-          reportScrollEvents,
-        } = this.options;
-
-        this.observer = new IntersectionObserver(this.handleIntersectionEvent, {
-          root,
-          rootMargin,
-          threshold: reportScrollEvents !== 'always' || reportScrollEvents !== 'whenVisible' ? intersectionThreshold : 0,
-        });
-
-        this.observer.observe(this.nodeRef.current);
-
-        this.setState({ intersectionObserverIsSupported });
-      }
+      if (this.canUseResizeObserver) this.setupResizeObserver();
+      if (this.canUseIntersectionObserver) this.setupIntersectionObserver();
     }
 
     componentDidUpdate(prevProps) {
-      const { reportScrollEvents } = this.options;
-      const { scrollInfo, windowInfo } = this.props;
-      const { isVisible, intersectionObserverIsSupported } = this.state;
+      console.warn('did update');
+      const {
+        windowInfo,
+        scrollInfo,
+        documentInfo,
+      } = this.props;
 
-      const scrollEventHasFired = prevProps.scrollInfo.eventsFired !== scrollInfo.eventsFired;
-      const windowEventHasFired = prevProps.windowInfo.eventsFired !== windowInfo.eventsFired;
-
-      if (windowEventHasFired) this.queryNodePosition();
-
-      if (scrollEventHasFired) {
-        if (
-          !intersectionObserverIsSupported
-          || reportScrollEvents === 'always'
-          || (!isVisible && reportScrollEvents === 'whenInvisible')
-          || (isVisible && reportScrollEvents === 'whenVisible')
-        ) this.handleScrollEvent();
-      }
+      if (prevProps.windowInfo.eventsFired !== windowInfo.eventsFired) this.handleWindowResize();
+      if (prevProps.scrollInfo.eventsFired !== scrollInfo.eventsFired) this.handleScrollEvent();
+      if (prevProps.documentInfo.eventsFired !== documentInfo.eventsFired) this.handleDocumentResize();
     }
 
     componentWillUnmount() {
-      const { intersectionObserverIsSupported } = this.state;
-      if (intersectionObserverIsSupported) this.observer.unobserve(this.nodeRef.current);
+      if (this.canUseIntersectionObserver) this.intersectionObserver.unobserve(this.nodeRef.current);
+      if (this.canUseResizeObserver) this.resizeObserver.unobserve(this.nodeRef.current);
+    }
+
+    setupResizeObserver = () => {
+      this.resizeObserver = new ResizeObserver(this.handleNodeResize);
+      this.resizeObserver.observe(this.nodeRef.current, { box: 'border-box' });
+    }
+
+    setupIntersectionObserver = () => {
+      const shouldSetThreshold = this.options.reportScrollEvents !== 'always' || this.options.reportScrollEvents !== 'whenVisible';
+
+      this.intersectionObserver = new IntersectionObserver(
+        this.handleIntersectionEvent,
+        {
+          // root: this.options.root, this property can be enabled in a future enhancement
+          root: null,
+          rootMargin: this.options.rootMargin,
+          threshold: shouldSetThreshold ? this.options.intersectionThreshold : 0,
+        },
+      );
+
+      this.intersectionObserver.observe(this.nodeRef.current);
     }
 
     handleScrollEvent = () => {
+      console.log('handle scroll event');
+      const { reportScrollEvents } = this.options;
       const { scrollInfo } = this.props;
+      const { nodeRect, isVisible, clippingMask } = this.state;
 
-      // The getBoundingClientRect received on mount in Chrome is calculated relative to the cached scroll position (if present),
-      // so tracking against it before the first scroll event would lead to de-synchronization unless queryNodePosition
-      // is run on the first scroll event, which allows for accurate, safe tracking on all subsequent events.
-      if (scrollInfo.eventsFired <= 1) this.queryNodePosition();
-      else this.trackNodePosition();
-    }
+      const shouldRespondToScrollEvent = (
+        !this.canUseIntersectionObserver
+        || reportScrollEvents === 'always'
+        || (!isVisible && reportScrollEvents === 'whenInvisible')
+        || (isVisible && reportScrollEvents === 'whenVisible')
+      );
 
-    // true position
-    handleIntersectionEvent = (entries) => {
-      const {
-        rootBounds: clippingMask,
-        boundingClientRect: nodeRect,
-        isIntersecting: isVisible,
-      } = entries[0];
-
-      this.setState({
-        clippingMask,
-        nodeRect,
-        ...this.calculateIntersection(clippingMask, nodeRect, isVisible),
-        ...this.calculateDisplacement(clippingMask, nodeRect),
-        ...this.calculateTotalNodeOffsets(nodeRect),
-      });
-    }
-
-    // true position
-    queryNodePosition = () => {
-      const { windowInfo } = this.props;
-      const { current: node } = this.nodeRef;
-
-      if (node) {
-        const frameOffset = 0; // TODO: parse the rootMargin option property instead
-
-        const clippingMask = {
-          width: windowInfo.width - (frameOffset * 2),
-          height: windowInfo.height - (frameOffset * 2),
-          top: frameOffset,
-          right: frameOffset ? windowInfo.width - frameOffset : windowInfo.width,
-          bottom: frameOffset ? windowInfo.height - frameOffset : windowInfo.height,
-          left: frameOffset,
+      if (shouldRespondToScrollEvent) {
+        const nodeRectAfterScroll = {
+          width: nodeRect.width,
+          height: nodeRect.height,
+          top: nodeRect.top - scrollInfo.yDifference,
+          right: nodeRect.right - scrollInfo.xDifference,
+          bottom: nodeRect.bottom - scrollInfo.yDifference,
+          left: nodeRect.left - scrollInfo.xDifference,
         };
 
-        const nodeRect = node.getBoundingClientRect(); // relative to the viewport
-
-        this.setState({
-          clippingMask,
-          nodeRect,
-          ...this.calculateIntersection(clippingMask, nodeRect),
-          ...this.calculateDisplacement(clippingMask, nodeRect),
-          ...this.calculateTotalNodeOffsets(nodeRect),
-        });
+        this.setNodePosition(clippingMask, nodeRectAfterScroll);
       }
     }
 
-    // synthetic (calculated) position
-    trackNodePosition = () => {
-      const { scrollInfo } = this.props;
-      const { nodeRect, clippingMask } = this.state;
+    handleIntersectionEvent = (entries) => {
+      if (this.intersectionObserverIsInitialized) {
+        console.log('handle intersection event');
+        const {
+          rootBounds: clippingMask,
+          boundingClientRect: nodeRect,
+          isIntersecting: isVisible,
+        } = entries[0];
 
-      const trackedNodeRect = {
-        // TODO: consider adjusting the newNodeRect to account for potential changes in the node dimensions.
-        // i.e. if the node's width or height changed at any point during synthetic tracking, these tracked values become inaccurate.
-        // A performance hit for this feature is the necessary use of the clientWidth and clientHeight methods on every scroll.
-        width: nodeRect.width,
-        height: nodeRect.height,
-        top: nodeRect.top - scrollInfo.yDifference,
-        right: nodeRect.right - scrollInfo.xDifference,
-        bottom: nodeRect.bottom - scrollInfo.yDifference,
-        left: nodeRect.left - scrollInfo.xDifference,
+        this.setNodePosition(clippingMask, nodeRect, isVisible);
+      }
+
+      this.intersectionObserverIsInitialized = true;
+    }
+
+    handleNodeResize = () => {
+      console.log('handle node resize');
+      this.setNodePosition(null, this.getNodeRect());
+    }
+
+    handleDocumentResize = () => {
+      console.log('handle document resize');
+      const nodeRect = this.getNodeRect();
+      this.setNodePosition(null, nodeRect);
+    }
+
+    handleWindowResize = () => {
+      const { windowInfo: { eventsFired } } = this.props;
+
+      if (eventsFired > 1) {
+        console.log('handle window resize');
+        const clippingMask = this.getClippingMask();
+        const nodeRect = this.getNodeRect();
+        this.setNodePosition(clippingMask, nodeRect);
+      }
+    }
+
+    getClippingMask = () => {
+      console.log('get clipping mask');
+      const { rootMargin } = this.options;
+      const { windowInfo } = this.props;
+
+      const margins = rootMargin.split(' ');
+      const margin = {
+        top: parseInt(margins[0], 10) || 0,
+        right: parseInt(margins[1], 10) || 0,
+        bottom: parseInt(margins[2], 10) || 0,
+        left: parseInt(margins[3], 10) || 0,
       };
 
-      this.setState({
-        nodeRect: trackedNodeRect,
-        ...this.calculateIntersection(clippingMask, nodeRect),
-        ...this.calculateDisplacement(clippingMask, nodeRect),
-      });
+      return {
+        width: windowInfo.width - margin.left - margin.right,
+        height: windowInfo.height - margin.top - margin.bottom,
+        top: margin.top,
+        right: windowInfo.width + margin.left,
+        bottom: windowInfo.height + margin.top,
+        left: margin.left,
+      };
+    }
+
+    getNodeRect = () => {
+      console.log('get node rect');
+      const { current: node } = this.nodeRef;
+      const { width, height, top, right, bottom, left } = node.getBoundingClientRect();
+      return { width, height, top, right, bottom, left };
     }
 
     calculateIntersection = (clippingMask, nodeRect, incomingVisibilityStatus) => {
+      console.log('get intersection');
       const planeIntersectionRect = { width: 0, height: 0 };
 
       const nodeSideIsInPlaneY = (rectSide) => rectSide >= clippingMask.left && rectSide <= clippingMask.right;
@@ -258,6 +280,7 @@ const withNodePosition = (PassedComponent, options) => {
     }
 
     calculateDisplacement = (clippingMask, nodeRect) => {
+      console.log('get displacement');
       const xTrackLength = clippingMask.width + nodeRect.width;
       const xDisplacedPixels = nodeRect.right - clippingMask.left;
       const xDisplacement = (xDisplacedPixels / xTrackLength) || 0;
@@ -275,7 +298,8 @@ const withNodePosition = (PassedComponent, options) => {
       };
     }
 
-    calculateTotalNodeOffsets = (nodeRect) => {
+    calculateTotalOffset = (nodeRect) => {
+      console.log('get node offsets');
       const { scrollInfo } = this.props;
       return {
         totalOffsetLeft: scrollInfo.x + nodeRect.left,
@@ -283,13 +307,24 @@ const withNodePosition = (PassedComponent, options) => {
       };
     }
 
-    pruneStale = () => {
-      const { isReset } = this.state;
+    setNodePosition = (incomingClippingMask, incomingNodeRect, incomingVisibilityStatus) => {
+      console.log('set node position');
+      const { clippingMask, nodeRect } = this.state;
 
-      if (!isReset) {
+      this.setState({
+        ...this.calculateIntersection(incomingClippingMask || clippingMask, incomingNodeRect || nodeRect, incomingVisibilityStatus),
+        ...this.calculateDisplacement(incomingClippingMask || clippingMask, incomingNodeRect || nodeRect),
+        ...this.calculateTotalOffset(incomingNodeRect || nodeRect),
+      });
+    }
+
+    pruneStale = () => {
+      const { isPruned } = this.state;
+
+      if (!isPruned) {
         this.setState({
           ...this.initialState,
-          isReset: true,
+          isPruned: true,
         });
       }
     }
@@ -300,7 +335,7 @@ const withNodePosition = (PassedComponent, options) => {
       delete passedProps.windowInfo;
 
       const passedState = { ...this.state };
-      delete passedState.intersectionObserverIsSupported;
+      console.warn('render');
 
       return (
         <PassedComponent
@@ -315,6 +350,11 @@ const withNodePosition = (PassedComponent, options) => {
   }
 
   Node.propTypes = {
+    windowInfo: PropTypes.shape({
+      width: PropTypes.number,
+      height: PropTypes.number,
+      eventsFired: PropTypes.number,
+    }).isRequired,
     scrollInfo: PropTypes.shape({
       x: PropTypes.number,
       y: PropTypes.number,
@@ -322,7 +362,7 @@ const withNodePosition = (PassedComponent, options) => {
       yDifference: PropTypes.number,
       eventsFired: PropTypes.number,
     }).isRequired,
-    windowInfo: PropTypes.shape({
+    documentInfo: PropTypes.shape({
       width: PropTypes.number,
       height: PropTypes.number,
       eventsFired: PropTypes.number,
