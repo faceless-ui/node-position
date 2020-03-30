@@ -24,14 +24,13 @@
     "test": "jest"
   },
   "peerDependencies": {
-    "react": "^16.8.0"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "dependencies": {
     "@trbl/react-scroll-info": "^1.0.0",
     "@trbl/react-window-info": "^1.0.0",
-    "prop-types": "^15.7.2",
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0"
+    "prop-types": "^15.7.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
@@ -56,6 +55,8 @@
     "husky": "^4.2.1",
     "jest": "^25.1.0",
     "lint-staged": "^10.0.6",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
     "react-hot-loader": "^4.12.19",
     "resize-observer-polyfill": "^1.5.1",
     "webpack": "^4.41.0",
