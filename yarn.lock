@@ -1112,23 +1112,19 @@
     object.assign "^4.1.0"
     object.entries "^1.1.1"
 
-"@trbl/react-scroll-info@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@trbl/react-scroll-info/-/react-scroll-info-1.0.0.tgz#a19fb349afa8ac1ae26d1816f6875e31b8116e5e"
-  integrity sha512-/69qIYR28WVin1xeT4lauN/2cw+OYuY4whMklBlsgLsP3MsjHvMLxlXJPbK52U1N20J1t6gx9bpZ/wMWSlusZw==
+"@trbl/react-scroll-info@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@trbl/react-scroll-info/-/react-scroll-info-1.1.1.tgz#31eac3b41825f6719313a3ab895df370a12554e7"
+  integrity sha512-1c79T7hHgM0mCt7z9/MZR5qzazGVJHUECYm4U6RrUIIaYikw71+VuTNOfPvFIzCOTjeW4CD0dT2iFM6bA0LO/A==
   dependencies:
     prop-types "^15.7.2"
-    react "^16.12.0"
-    react-dom "^16.12.0"
 
-"@trbl/react-window-info@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@trbl/react-window-info/-/react-window-info-1.0.0.tgz#d41f7939dcbd5ee82a192a3eeee84be687d7ae23"
-  integrity sha512-rW+xDsPrjqS9Z0ZmI1mWbOmtqa/IeHAr2fBNkn35s4BhTrt2DqeURXSGfbCR2t1uBMrFjYjEqzc8RHoQqaK1aA==
+"@trbl/react-window-info@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@trbl/react-window-info/-/react-window-info-1.1.1.tgz#628a57b0231fb5278ea9c7d593581411ccaf6604"
+  integrity sha512-ovNq59VP5L/PVGS2g/5cInhk9ODnNkrM+yJ8Fw2i+QnhDfJrMcM4JiJnYYF3dtcFW17atPrhw6TTz0YFx0KmVw==
   dependencies:
     prop-types "^15.7.2"
-    react "^16.12.0"
-    react-dom "^16.12.0"
 
 "@trbl/utils@^1.1.1":
   version "1.1.1"
@@ -6847,7 +6843,7 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-react-dom@^16.11.0, react-dom@^16.12.0:
+react-dom@^16.12.0:
   version "16.12.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.12.0.tgz#0da4b714b8d13c2038c9396b54a92baea633fe11"
   integrity sha512-LMxFfAGrcS3kETtQaCkTKjMiifahaMySFDn71fZUNpPHZQEzmk/GiAeIT8JSOrHB23fnuCOMruL2a8NYlw+8Gw==
@@ -6891,7 +6887,7 @@ react-test-renderer@^16.0.0-0:
     react-is "^16.8.6"
     scheduler "^0.18.0"
 
-react@^16.11.0, react@^16.12.0:
+react@^16.12.0:
   version "16.12.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.12.0.tgz#0c0a9c6a142429e3614834d5a778e18aa78a0b83"
   integrity sha512-fglqy3k5E+81pA8s+7K0/T3DBCF0ZDOher1elBFzF7O6arXJgzyu/FW+COxFvAWXJoJN9KIZbT2LXlukwphYTA==
@@ -7126,6 +7122,11 @@ requires-port@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
+
+resize-observer-polyfill@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
+  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 resolve-cwd@^2.0.0:
   version "2.0.0"

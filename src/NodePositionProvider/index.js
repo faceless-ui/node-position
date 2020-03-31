@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { WindowInfoProvider, WindowInfoContext } from '@trbl/react-window-info';
-import { ScrollInfoProvider, ScrollInfoContext } from '@trbl/react-scroll-info';
+import { WindowInfoProvider } from '@trbl/react-window-info';
+import { ScrollInfoProvider } from '@trbl/react-scroll-info';
 import ResizeObserver from 'resize-observer-polyfill';
 
 import NodePositionContext from './context';
@@ -10,39 +10,37 @@ class NodePositionProvider extends Component {
   constructor() {
     super();
 
-    this.canUseResizeObserver = false;
     this.resizeObserver = null;
 
     this.state = {
-      documentInfo: {
-        width: 0,
-        height: 0,
-        eventsFired: 0,
-      },
+      width: 0,
+      height: 0,
+      eventsFired: 0,
+      canUseResizeObserver: false,
     };
   }
 
   componentDidMount() {
-    this.canUseResizeObserver = 'ResizeObserver' in window;
+    const canUseResizeObserver = 'ResizeObserver' in window;
 
-    if (this.canUseResizeObserver) {
+    if (canUseResizeObserver) {
       this.resizeObserver = new ResizeObserver(this.handleResizeEvent);
       this.resizeObserver.observe(document.documentElement, { box: 'border-box' });
+      this.setState({ canUseResizeObserver });
     }
   }
 
   componentWillUnmount() {
-    if (this.canUseResizeObserver) this.resizeObserver.unobserve(document.documentElement);
+    const { canUseResizeObserver } = this.state;
+    if (canUseResizeObserver) this.resizeObserver.unobserve(document.documentElement);
   }
 
   handleResizeEvent = (entries) => {
     const { contentRect: { width, height } } = entries[0];
     this.setState((state) => ({
-      documentInfo: {
-        width,
-        height,
-        eventsFired: state.eventsFired + 1,
-      },
+      width,
+      height,
+      eventsFired: state.eventsFired + 1,
     }));
   }
 
@@ -51,25 +49,17 @@ class NodePositionProvider extends Component {
 
     return (
       <WindowInfoProvider>
-        <WindowInfoContext.Consumer>
-          {(windowInfo) => (
-            <ScrollInfoProvider>
-              <ScrollInfoContext.Consumer>
-                {(scrollInfo) => (
-                  <NodePositionContext.Provider
-                    value={{
-                      ...windowInfo,
-                      ...scrollInfo,
-                      ...this.state,
-                    }}
-                  >
-                    {children && children}
-                  </NodePositionContext.Provider>
-                )}
-              </ScrollInfoContext.Consumer>
-            </ScrollInfoProvider>
-          )}
-        </WindowInfoContext.Consumer>
+        <ScrollInfoProvider>
+          <NodePositionContext.Provider
+            value={{
+              documentInfo: {
+                ...this.state,
+              },
+            }}
+          >
+            {children && children}
+          </NodePositionContext.Provider>
+        </ScrollInfoProvider>
       </WindowInfoProvider>
     );
   }

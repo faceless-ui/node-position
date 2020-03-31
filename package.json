@@ -28,8 +28,8 @@
     "react-dom": "^16.8.0"
   },
   "dependencies": {
-    "@trbl/react-scroll-info": "^1.0.0",
-    "@trbl/react-window-info": "^1.0.0",
+    "@trbl/react-scroll-info": "^1.1.1",
+    "@trbl/react-window-info": "^1.1.1",
     "prop-types": "^15.7.2"
   },
   "devDependencies": {
