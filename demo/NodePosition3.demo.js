@@ -2,7 +2,7 @@ import React, { Fragment, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import withNodePosition from '../src/withNodePosition';
-import NodeDetails from './NodeDetails';
+import PrintSummary from './PrintSummary';
 
 const backgroundColor = 'violet';
 
@@ -13,12 +13,12 @@ const options = {
 };
 
 const NodePositionDemo3 = forwardRef((props, ref) => {
-  const { nodePosition, detailsContainer } = props;
+  const { nodePosition, summaryContainer } = props;
 
   return (
     <Fragment>
-      {detailsContainer.current && createPortal(
-        <NodeDetails
+      {summaryContainer.current && createPortal(
+        <PrintSummary
           {...{
             summary: 'Node 3',
             color: backgroundColor,
@@ -26,7 +26,7 @@ const NodePositionDemo3 = forwardRef((props, ref) => {
             nodePosition,
           }}
         />,
-        detailsContainer.current,
+        summaryContainer.current,
       )}
       <div
         ref={ref}
@@ -43,7 +43,7 @@ const NodePositionDemo3 = forwardRef((props, ref) => {
 
 NodePositionDemo3.propTypes = {
   nodePosition: PropTypes.shape({}).isRequired,
-  detailsContainer: PropTypes.shape({
+  summaryContainer: PropTypes.shape({
     current: PropTypes.shape({}),
   }).isRequired,
 };

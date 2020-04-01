@@ -2,7 +2,7 @@ import React, { Fragment, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import withNodePosition from '../src/withNodePosition';
-import NodeDetails from './NodeDetails';
+import PrintSummary from './PrintSummary';
 
 const options = {
   reportScrollEvents: 'whenVisible',
@@ -11,12 +11,12 @@ const options = {
 const backgroundColor = 'lightcoral';
 
 const NodePositionDemo1 = forwardRef((props, ref) => {
-  const { nodePosition, detailsContainer } = props;
+  const { nodePosition, summaryContainer } = props;
 
   return (
     <Fragment>
-      {detailsContainer.current && createPortal(
-        <NodeDetails
+      {summaryContainer.current && createPortal(
+        <PrintSummary
           {...{
             summary: 'Node 1',
             color: backgroundColor,
@@ -25,7 +25,7 @@ const NodePositionDemo1 = forwardRef((props, ref) => {
           }}
           open
         />,
-        detailsContainer.current,
+        summaryContainer.current,
       )}
       <div
         ref={ref}
@@ -47,7 +47,7 @@ NodePositionDemo1.defaultProps = {
 
 NodePositionDemo1.propTypes = {
   nodePosition: PropTypes.shape({}).isRequired,
-  detailsContainer: PropTypes.shape({
+  summaryContainer: PropTypes.shape({
     current: PropTypes.shape({}),
   }).isRequired,
   style: PropTypes.shape({}),
