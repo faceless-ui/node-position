@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useReducer, useRef } from 'react';
+import { useEffect, useContext, useReducer, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useWindowInfo } from '@trbl/react-window-info';
 import { useScrollInfo } from '@trbl/react-scroll-info';
@@ -137,9 +137,11 @@ const getNodeRect = (nodeRef) => {
 };
 
 const nodePositionReducer = (state, payload) => {
+  console.log('DISPATCH_REDUCER');
   const {
     clippingMask: incomingClippingMask,
     nodeRect: incomingNodeRect,
+    visibilityStatus,
   } = payload;
 
   const clippingMask = incomingClippingMask || state.clippingMask;
@@ -148,36 +150,77 @@ const nodePositionReducer = (state, payload) => {
   return {
     clippingMask,
     nodeRect,
-    ...calculateIntersection(clippingMask, nodeRect),
+    ...calculateIntersection(clippingMask, nodeRect, visibilityStatus),
     ...calculateDisplacement(clippingMask, nodeRect),
     ...calculateTotalOffset(nodeRect),
   };
 };
 
 const useNodePosition = (nodeRef, incomingOptions) => {
-  const { documentInfo } = useContext(NodePositionContext);
   const [nodePosition, dispatchNodePosition] = useReducer(nodePositionReducer, initialNodePosition);
 
   //
   // Merge options with defaults into state
   //
 
-  const [options, setOptions] = useState(defaultOptions);
-
-  useEffect(() => {
-    setOptions({
-      ...defaultOptions,
-      ...incomingOptions,
-    });
-  }, [incomingOptions]);
+  const options = useRef({
+    ...defaultOptions,
+    ...incomingOptions,
+  });
 
   //
-  // Handling incoming node ref
+  // Handle incoming node ref
   //
 
   useEffect(() => {
-    dispatchNodePosition({ type: 'REF', payload: nodeRef });
+    console.log('REF_EVENT');
+    dispatchNodePosition({ nodeRect: getNodeRect(nodeRef) });
   }, [nodeRef]);
+
+  //
+  // Handling intersection events
+  //
+
+  const intersectionObserverRef = useRef();
+
+  const {
+    documentInfo,
+    canUseIntersectionObserver,
+  } = useContext(NodePositionContext);
+
+  const setupInstersectionObserver = useCallback(() => {
+    const shouldSetThreshold = !(options.current.reportScrollEvents === 'always' || options.current.reportScrollEvents === 'whenVisible');
+    intersectionObserverRef.current = new IntersectionObserver(
+      ([{
+        rootBounds: clippingMask,
+        boundingClientRect: nodeRect,
+        isIntersecting: isVisible,
+      }]) => {
+        console.log('INTERSECTION_EVENT');
+        dispatchNodePosition({ clippingMask, nodeRect, isVisible });
+      }, {
+        root: null, // or `options.root` to be enabled in a future enhancement
+        rootMargin: '0px',
+        threshold: shouldSetThreshold ? options.current.intersectionThreshold : 0,
+      },
+    );
+  }, [options]);
+
+  useEffect(() => {
+    const { current: intersectionObserver } = intersectionObserverRef;
+    const { current: node } = nodeRef;
+
+    if (canUseIntersectionObserver && !intersectionObserver) {
+      setupInstersectionObserver();
+      intersectionObserverRef.current.observe(node);
+    }
+
+    return () => {
+      if (canUseIntersectionObserver && !intersectionObserver) {
+        intersectionObserver.unobserve(node);
+      }
+    };
+  }, [canUseIntersectionObserver, nodeRef, setupInstersectionObserver]);
 
   //
   // Handle window resize events
@@ -198,12 +241,10 @@ const useNodePosition = (nodeRef, incomingOptions) => {
           bottom: windowInfo.height,
           left: 0,
         },
-        nodeRect: {
-          ...getNodeRect(nodeRef),
-        },
+        nodeRect: getNodeRect(nodeRef),
       });
     }
-  }, [windowInfo, options, prevWindowEventsFired, nodeRef]);
+  }, [windowInfo, prevWindowEventsFired, nodeRef]);
 
   //
   // Handle scroll events
@@ -216,13 +257,11 @@ const useNodePosition = (nodeRef, incomingOptions) => {
     if (
       scrollInfo.eventsFired > prevScrollEventsFired
       && (!documentInfo.canUseIntersectionObserver
-        || options.reportScrollEvents === 'always'
-        || (!options.isVisible && options.reportScrollEvents === 'whenInvisible')
-        || (options.isVisible && options.reportScrollEvents === 'whenVisible'))
+        || options.current.reportScrollEvents === 'always'
+        || (!options.current.isVisible && options.current.reportScrollEvents === 'whenInvisible')
+        || (options.current.isVisible && options.current.reportScrollEvents === 'whenVisible'))
     ) {
-      console.log('SCROLL_EVENT');
-      console.log('current', scrollInfo.eventsFired);
-      console.log('prev', prevScrollEventsFired);
+      console.log('SCROLL');
       const { nodeRect } = nodePosition;
       dispatchNodePosition({
         nodeRect: {
@@ -236,10 +275,6 @@ const useNodePosition = (nodeRef, incomingOptions) => {
       });
     }
   }, [scrollInfo, documentInfo, options, prevScrollEventsFired, nodePosition]);
-
-  //
-  // Return the nodePosition
-  //
 
   return nodePosition;
 };

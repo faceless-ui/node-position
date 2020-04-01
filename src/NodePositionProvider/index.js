@@ -13,21 +13,28 @@ class NodePositionProvider extends Component {
     this.resizeObserver = null;
 
     this.state = {
-      width: 0,
-      height: 0,
-      eventsFired: 0,
+      documentInfo: {
+        width: 0,
+        height: 0,
+        eventsFired: 0,
+      },
       canUseResizeObserver: false,
+      canUseIntersectionObserver: false,
     };
   }
 
   componentDidMount() {
     const canUseResizeObserver = 'ResizeObserver' in window;
+    const canUseIntersectionObserver = 'IntersectionObserver' in window
+      && 'IntersectionObserverEntry' in window
+      && 'intersectionRatio' in window.IntersectionObserverEntry.prototype;
 
     if (canUseResizeObserver) {
       this.resizeObserver = new ResizeObserver(this.handleResizeEvent);
       this.resizeObserver.observe(document.documentElement, { box: 'border-box' });
-      this.setState({ canUseResizeObserver });
     }
+
+    this.setState({ canUseResizeObserver, canUseIntersectionObserver });
   }
 
   componentWillUnmount() {
@@ -38,9 +45,11 @@ class NodePositionProvider extends Component {
   handleResizeEvent = (entries) => {
     const { contentRect: { width, height } } = entries[0];
     this.setState((state) => ({
-      width,
-      height,
-      eventsFired: state.eventsFired + 1,
+      documentInfo: {
+        width,
+        height,
+        eventsFired: state.eventsFired + 1,
+      },
     }));
   }
 
@@ -50,13 +59,7 @@ class NodePositionProvider extends Component {
     return (
       <WindowInfoProvider>
         <ScrollInfoProvider>
-          <NodePositionContext.Provider
-            value={{
-              documentInfo: {
-                ...this.state,
-              },
-            }}
-          >
+          <NodePositionContext.Provider value={{ ...this.state }}>
             {children && children}
           </NodePositionContext.Provider>
         </ScrollInfoProvider>

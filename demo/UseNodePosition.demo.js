@@ -4,7 +4,7 @@ import { useNodePosition } from '../src'; // swap '../src' for '../dist/build.bu
 const UseNodePosition = () => {
   const ref = useRef();
   const nodePosition = useNodePosition(ref); // eslint-disable-line no-unused-vars
-  console.log('useNodePosition', nodePosition);
+  console.log(nodePosition);
 
   return (
     <Fragment>
