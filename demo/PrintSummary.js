@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import LogProps from './LogProps';
 
 const PrintSummary = (props) => {
   const {
@@ -17,11 +18,7 @@ const PrintSummary = (props) => {
           {summary}
         </span>
       </summary>
-      <code>
-        <pre style={{ margin: '0 0 20px' }}>
-          {JSON.stringify({ options, nodePosition }, (k, v) => (v === undefined ? 'undefined' : v), 2)}
-        </pre>
-      </code>
+      <LogProps {...{ ...options, ...nodePosition }} />
     </details>
   );
 };

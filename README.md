@@ -4,13 +4,15 @@
 
 # React Node Position
 
-Send nodes.
+## Highlights
 
 ## Quick Start
 
 ### Installation
 
 ```bash
+$ npm i @trbl/react-node-position
+$ # or
 $ yarn add @trbl/react-node-position
 ```
 
@@ -20,36 +22,32 @@ $ yarn add @trbl/react-node-position
   import React from 'react';
   import { NodePositionProvider, withNodePosition } from '@trbl/react-node-position';
 
-  const MyComponent = withNodePosition(forwardRef(props, ref) => return <div ref={ref}>My Component</div>));
+  const WithNodePosition = withNodePosition(forwardRef({ nodePosition }, ref) => <div ref={ref}>{nodePosition}</div>));
 
-  const App = () => {
-    return (
-      <NodePositionProvider>
-        <MyComponent>
-          ...
-        </MyComponent>
-      </NodePositionProvider>
-    )
-  }
+  const App = () => (
+    <NodePositionProvider>
+      <WithNodePosition />>
+    </NodePositionProvider>
+  )
 
   export default App;
 ```
 
+For working examples, see the [demo app](./demo/App.demo.js).
+
 ## Demo
 
-To demo locally, clone the repo and
-
 ```bash
+$ git clone git@github.com:trouble/react-node-position.git
 $ yarn
 $ yarn dev
 $ open http://localhost:3000
 ```
 
-## Documentation
-
-All available props can be found via the references below:
+## API
 
   - [NodePositionProvider](./src/NodePositionProvider/README.md)
+  - [useNodePosition](./src/useNodePosition/README.md)
   - [withNodePosition](./src/withNodePosition/README.md)
 
 ## Contribution
