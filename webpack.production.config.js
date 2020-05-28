@@ -20,8 +20,8 @@ module.exports = [{
     ],
   },
   externals: {
-    '@trbl/react-scroll-info': '@trbl/react-scroll-info',
-    '@trbl/react-window-info': '@trbl/react-window-info',
+    '@faceless-ui/scroll-info': '@faceless-ui/scroll-info',
+    '@faceless-ui/window-info': '@faceless-ui/window-info',
     'prop-types': 'prop-types',
     react: 'react',
     'react-dom': 'react-dom',

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { WindowInfoProvider } from '@trbl/react-window-info';
-import { ScrollInfoProvider } from '@trbl/react-scroll-info';
+import { WindowInfoProvider } from '@faceless-ui/window-info';
+import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import ResizeObserver from 'resize-observer-polyfill';
 
 import NodePositionContext from './context';

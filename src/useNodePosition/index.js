@@ -1,7 +1,7 @@
 import { useEffect, useContext, useReducer, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { useWindowInfo } from '@trbl/react-window-info';
-import { useScrollInfo } from '@trbl/react-scroll-info';
+import { useWindowInfo } from '@faceless-ui/window-info';
+import { useScrollInfo } from '@faceless-ui/scroll-info';
 import NodePositionContext from '../NodePositionProvider/context';
 
 const defaultOptions = {};
@@ -199,10 +199,10 @@ const useNodePosition = (nodeRef, incomingOptions) => {
         console.log('INTERSECTION_EVENT');
         dispatchNodePosition({ clippingMask, nodeRect, isVisible });
       }, {
-        root: null, // or `options.root` to be enabled in a future enhancement
-        rootMargin: '0px',
-        threshold: shouldSetThreshold ? options.current.intersectionThreshold : 0,
-      },
+      root: null, // or `options.root` to be enabled in a future enhancement
+      rootMargin: '0px',
+      threshold: shouldSetThreshold ? options.current.intersectionThreshold : 0,
+    },
     );
   }, [options]);
 

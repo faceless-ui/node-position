@@ -1,8 +1,8 @@
 {
-  "name": "@trbl/react-node-position",
+  "name": "@faceless-ui/node-position",
   "version": "1.1.1",
   "main": "dist/build.bundle.js",
-  "repository": "git@github.com:trouble/react-node-position.git",
+  "repository": "git@github.com:faceless-ui/node-position.git",
   "description": "Send nodes.",
   "author": "<dev@trbl.design>",
   "license": "MIT",
@@ -28,8 +28,8 @@
     "react-dom": "^16.8.0"
   },
   "dependencies": {
-    "@trbl/react-scroll-info": "^1.1.1",
-    "@trbl/react-window-info": "^1.1.1",
+    "@faceless-ui/scroll-info": "^1.1.1",
+    "@faceless-ui/window-info": "^1.1.1",
     "prop-types": "^15.7.2"
   },
   "devDependencies": {
